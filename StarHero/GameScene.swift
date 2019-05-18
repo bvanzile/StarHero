@@ -10,14 +10,22 @@ import SpriteKit
 import GameplayKit
 
 class GameScene: SKScene {
-    
+    // The drawing node created with the default project when pressing the screen
     private var spinnyNode : SKShapeNode?
     
     override func didMove(to view: SKView) {
         print("didMove")
         
+        // Update the configuration file with accurate game screen field dimensions
+        Config.updateFieldDimenstions(fieldWidth: self.size.width, fieldHieght: self.size.height)
+        
+        // Set up the object manager for this game scene
+        for node in ObjectManager.sharedInstance.setup() {
+            self.addChild(node)
+        }
+        
         // Create shape node to use during mouse interaction
-        let w = (self.size.width + self.size.height) * 0.01
+        let w = (self.size.width + self.size.height) * 0.02
         self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
         
         if let spinnyNode = self.spinnyNode {
@@ -28,12 +36,7 @@ class GameScene: SKScene {
                                               SKAction.fadeOut(withDuration: 0.5),
                                               SKAction.removeFromParent()]))
         }
-        
-        for node in ObjectManager.sharedInstance.setup() {
-            self.addChild(node)
-        }
     }
-    
     
     func touchDown(atPoint pos : CGPoint) {
         print("touchDown at \(pos)")
@@ -41,6 +44,14 @@ class GameScene: SKScene {
             n.position = pos
             n.strokeColor = SKColor.green
             self.addChild(n)
+        }
+        
+        let touchedNode = self.nodes(at: pos)
+        for n in touchedNode {
+            if let myNode = n.name {
+                print("Deleting \(myNode)")
+                ObjectManager.sharedInstance.removeObject(inName: myNode)
+            }
         }
     }
     
@@ -53,7 +64,6 @@ class GameScene: SKScene {
     }
     
     func touchUp(atPoint pos : CGPoint) {
-        print("touchUp")
         if let n = self.spinnyNode?.copy() as! SKShapeNode? {
             n.position = pos
             n.strokeColor = SKColor.red
@@ -62,8 +72,6 @@ class GameScene: SKScene {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        print("touchesBegan")
-        
         for t in touches { self.touchDown(atPoint: t.location(in: self)) }
     }
     
@@ -76,13 +84,13 @@ class GameScene: SKScene {
     }
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        print("touchesCancelled?")
         for t in touches { self.touchUp(atPoint: t.location(in: self)) }
     }
     
-    
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
+        
+        // Update the game objects
         ObjectManager.sharedInstance.update()
     }
 }

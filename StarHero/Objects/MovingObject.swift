@@ -11,8 +11,8 @@ import SpriteKit
 
 class MovingObject: BaseObject {
     
-    //
-    private var velocity: Int = 0
+    // Things an object needs to move around
+    internal var velocity: CGFloat = 0.0
     
     // Initializer
     override init() {
@@ -26,7 +26,12 @@ class MovingObject: BaseObject {
     }
     
     // Update function
-    override func update() {
-        super.update()
+    override func update() -> Bool {
+        return super.update()
+    }
+    
+    // Get a unique name for the object, this version should be overwritten
+    override func getUniqueName() -> String {
+        return ""
     }
 }

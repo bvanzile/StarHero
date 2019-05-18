@@ -9,6 +9,11 @@
 import Foundation
 import SpriteKit
 
+// Simple struct for storing an objects position
+struct Position {
+    var x: CGFloat = 0
+    var y: CGFloat = 0
+}
 
 // Singleton class for useful and repeatable conversions
 class Conversions {
@@ -20,6 +25,7 @@ class Conversions {
         
     }
     
+    // Reusable function for taking separated coordinates and returning a CGPoint object
     func coordToCGPoint(x: CGFloat, y: CGFloat) -> CGPoint {
         return CGPoint(x: x, y: y)
     }

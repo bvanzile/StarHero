@@ -24,7 +24,6 @@ class GameViewController: UIViewController {
                 
                 // Present the scene
                 view.presentScene(scene)
-                print(scene)
             }
             
             view.ignoresSiblingOrder = true
