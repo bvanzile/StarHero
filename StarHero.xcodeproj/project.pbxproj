@@ -17,6 +17,14 @@
 		465CEF642283A2750082E062 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 465CEF622283A2750082E062 /* LaunchScreen.storyboard */; };
 		465CEF6F2283A2750082E062 /* StarHeroTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEF6E2283A2750082E062 /* StarHeroTests.swift */; };
 		465CEF7A2283A2750082E062 /* StarHeroUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEF792283A2750082E062 /* StarHeroUITests.swift */; };
+		465CEF88228F151A0082E062 /* BaseObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEF87228F151A0082E062 /* BaseObject.swift */; };
+		465CEF8B228F17590082E062 /* FighterShip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEF8A228F17590082E062 /* FighterShip.swift */; };
+		465CEF92228F4C140082E062 /* Guy.png in Resources */ = {isa = PBXBuildFile; fileRef = 465CEF91228F4C140082E062 /* Guy.png */; };
+		465CEF96228F638E0082E062 /* ConfigurationFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEF95228F638E0082E062 /* ConfigurationFile.swift */; };
+		465CEF98228F64660082E062 /* FighterShip.png in Resources */ = {isa = PBXBuildFile; fileRef = 465CEF97228F64660082E062 /* FighterShip.png */; };
+		465CEF9A228F657B0082E062 /* ObjectManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEF99228F657B0082E062 /* ObjectManager.swift */; };
+		465CEF9C228F775F0082E062 /* MovingObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEF9B228F775F0082E062 /* MovingObject.swift */; };
+		465CEF9E228F84BD0082E062 /* MathAndConversions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEF9D228F84BD0082E062 /* MathAndConversions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +61,14 @@
 		465CEF752283A2750082E062 /* StarHeroUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StarHeroUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		465CEF792283A2750082E062 /* StarHeroUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarHeroUITests.swift; sourceTree = "<group>"; };
 		465CEF7B2283A2750082E062 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		465CEF87228F151A0082E062 /* BaseObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseObject.swift; sourceTree = "<group>"; };
+		465CEF8A228F17590082E062 /* FighterShip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FighterShip.swift; sourceTree = "<group>"; };
+		465CEF91228F4C140082E062 /* Guy.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Guy.png; path = "../../../../../Downloads/Assets @1x/player/Guy.png"; sourceTree = "<group>"; };
+		465CEF95228F638E0082E062 /* ConfigurationFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationFile.swift; sourceTree = "<group>"; };
+		465CEF97228F64660082E062 /* FighterShip.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FighterShip.png; sourceTree = "<group>"; };
+		465CEF99228F657B0082E062 /* ObjectManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectManager.swift; sourceTree = "<group>"; };
+		465CEF9B228F775F0082E062 /* MovingObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovingObject.swift; sourceTree = "<group>"; };
+		465CEF9D228F84BD0082E062 /* MathAndConversions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathAndConversions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,13 +119,16 @@
 		465CEF522283A2720082E062 /* StarHero */ = {
 			isa = PBXGroup;
 			children = (
+				465CEF9F228F888B0082E062 /* Useful */,
+				465CEF89228F17250082E062 /* Objects */,
 				465CEF532283A2720082E062 /* AppDelegate.swift */,
-				465CEF552283A2720082E062 /* GameScene.sks */,
-				465CEF572283A2720082E062 /* Actions.sks */,
 				465CEF592283A2720082E062 /* GameScene.swift */,
 				465CEF5B2283A2720082E062 /* GameViewController.swift */,
+				465CEF552283A2720082E062 /* GameScene.sks */,
+				465CEF572283A2720082E062 /* Actions.sks */,
 				465CEF5D2283A2720082E062 /* Main.storyboard */,
 				465CEF602283A2750082E062 /* Assets.xcassets */,
+				465CEF8E228F1AAC0082E062 /* Assets */,
 				465CEF622283A2750082E062 /* LaunchScreen.storyboard */,
 				465CEF652283A2750082E062 /* Info.plist */,
 			);
@@ -132,6 +151,35 @@
 				465CEF7B2283A2750082E062 /* Info.plist */,
 			);
 			path = StarHeroUITests;
+			sourceTree = "<group>";
+		};
+		465CEF89228F17250082E062 /* Objects */ = {
+			isa = PBXGroup;
+			children = (
+				465CEF87228F151A0082E062 /* BaseObject.swift */,
+				465CEF9B228F775F0082E062 /* MovingObject.swift */,
+				465CEF8A228F17590082E062 /* FighterShip.swift */,
+				465CEF99228F657B0082E062 /* ObjectManager.swift */,
+			);
+			path = Objects;
+			sourceTree = "<group>";
+		};
+		465CEF8E228F1AAC0082E062 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				465CEF97228F64660082E062 /* FighterShip.png */,
+				465CEF91228F4C140082E062 /* Guy.png */,
+			);
+			path = Assets;
+			sourceTree = "<group>";
+		};
+		465CEF9F228F888B0082E062 /* Useful */ = {
+			isa = PBXGroup;
+			children = (
+				465CEF9D228F84BD0082E062 /* MathAndConversions.swift */,
+				465CEF95228F638E0082E062 /* ConfigurationFile.swift */,
+			);
+			path = Useful;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -238,6 +286,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				465CEF98228F64660082E062 /* FighterShip.png in Resources */,
+				465CEF92228F4C140082E062 /* Guy.png in Resources */,
 				465CEF5F2283A2720082E062 /* Main.storyboard in Resources */,
 				465CEF562283A2720082E062 /* GameScene.sks in Resources */,
 				465CEF612283A2750082E062 /* Assets.xcassets in Resources */,
@@ -267,9 +317,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				465CEF96228F638E0082E062 /* ConfigurationFile.swift in Sources */,
 				465CEF5A2283A2720082E062 /* GameScene.swift in Sources */,
+				465CEF88228F151A0082E062 /* BaseObject.swift in Sources */,
 				465CEF5C2283A2720082E062 /* GameViewController.swift in Sources */,
+				465CEF9C228F775F0082E062 /* MovingObject.swift in Sources */,
 				465CEF542283A2720082E062 /* AppDelegate.swift in Sources */,
+				465CEF9A228F657B0082E062 /* ObjectManager.swift in Sources */,
+				465CEF8B228F17590082E062 /* FighterShip.swift in Sources */,
+				465CEF9E228F84BD0082E062 /* MathAndConversions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
