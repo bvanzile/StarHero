@@ -49,10 +49,13 @@ class GameScene: SKScene {
         let touchedNode = self.nodes(at: pos)
         for n in touchedNode {
             if let myNode = n.name {
-                print("Deleting \(myNode)")
+                print("Clicked \(myNode)")
                 ObjectManager.sharedInstance.removeObject(inName: myNode)
             }
         }
+        
+        // Pass the along the position that the screen was touched
+        ObjectManager.sharedInstance.screenTouched(pos: pos)
     }
     
     func touchMoved(toPoint pos : CGPoint) {

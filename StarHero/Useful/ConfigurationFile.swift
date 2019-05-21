@@ -10,7 +10,6 @@ import Foundation
 import SpriteKit
 
 struct Config {
-    
     // Call for updating the width and height of the game scene
     static func updateFieldDimenstions(fieldWidth: CGFloat, fieldHieght: CGFloat) {
         self.FieldWidth = fieldWidth
@@ -25,7 +24,7 @@ struct Config {
     static let FighterShipLocation: String = "FighterShip"
     
     // Fighter ship configurations
-    static let FighterShipVelocity: Int = 10
+    static let FighterShipVelocity: CGFloat = 0.5
     
     // Team names
     struct Team {
@@ -43,4 +42,20 @@ struct Config {
     static let ColorTeal:UIColor = UIColor(displayP3Red: 50.0/255.0, green: 188.0/255.0, blue: 173.0/255.0, alpha: 1.0)
     static let ColorOrange:UIColor = UIColor(displayP3Red: 250.0/255.0, green: 162.0/255.0, blue: 28.0/255.0, alpha: 1.0)
     static let ColorDarkBlue:UIColor = UIColor(displayP3Red: 26.0/255.0, green: 87.0/255.0, blue: 168.0/255.0, alpha: 1.0)
+    
+    // Assign color based on team input
+    static func getTeamColor(team: Int) -> UIColor {
+        switch team {
+        case Config.Team.RedTeam:
+            return Config.ColorRed
+        case Config.Team.BlueTeam:
+            return Config.ColorBlue
+        case Config.Team.GreenTeam:
+            return Config.ColorGreen
+        case Config.Team.OrangeTeam:
+            return Config.ColorOrange
+        default:
+            return Config.ColorTeal
+        }
+    }
 }

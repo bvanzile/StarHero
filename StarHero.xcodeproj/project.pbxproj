@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		465CEF542283A2720082E062 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEF532283A2720082E062 /* AppDelegate.swift */; };
-		465CEF562283A2720082E062 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 465CEF552283A2720082E062 /* GameScene.sks */; };
 		465CEF582283A2720082E062 /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = 465CEF572283A2720082E062 /* Actions.sks */; };
 		465CEF5A2283A2720082E062 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEF592283A2720082E062 /* GameScene.swift */; };
 		465CEF5C2283A2720082E062 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEF5B2283A2720082E062 /* GameViewController.swift */; };
@@ -23,8 +22,12 @@
 		465CEF96228F638E0082E062 /* ConfigurationFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEF95228F638E0082E062 /* ConfigurationFile.swift */; };
 		465CEF98228F64660082E062 /* FighterShip.png in Resources */ = {isa = PBXBuildFile; fileRef = 465CEF97228F64660082E062 /* FighterShip.png */; };
 		465CEF9C228F775F0082E062 /* MovingObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEF9B228F775F0082E062 /* MovingObject.swift */; };
-		465CEF9E228F84BD0082E062 /* MathAndConversions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEF9D228F84BD0082E062 /* MathAndConversions.swift */; };
 		465CEFA32290A94E0082E062 /* ObjectManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEFA22290A94E0082E062 /* ObjectManager.swift */; };
+		465CEFA72291BBAE0082E062 /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEFA62291BBAE0082E062 /* State.swift */; };
+		465CEFA92291D0FF0082E062 /* StateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEFA82291D0FF0082E062 /* StateMachine.swift */; };
+		465CEFAB2291E38B0082E062 /* FighterShipWanderState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEFAA2291E38B0082E062 /* FighterShipWanderState.swift */; };
+		46EBC27F229364A800CBF2F6 /* VectorMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEFAE229362C10082E062 /* VectorMath.swift */; };
+		46EBC28522936A1A00CBF2F6 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 465CEF552283A2720082E062 /* GameScene.sks */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,8 +70,11 @@
 		465CEF95228F638E0082E062 /* ConfigurationFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationFile.swift; sourceTree = "<group>"; };
 		465CEF97228F64660082E062 /* FighterShip.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FighterShip.png; sourceTree = "<group>"; };
 		465CEF9B228F775F0082E062 /* MovingObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovingObject.swift; sourceTree = "<group>"; };
-		465CEF9D228F84BD0082E062 /* MathAndConversions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathAndConversions.swift; sourceTree = "<group>"; };
 		465CEFA22290A94E0082E062 /* ObjectManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectManager.swift; sourceTree = "<group>"; };
+		465CEFA62291BBAE0082E062 /* State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State.swift; sourceTree = "<group>"; };
+		465CEFA82291D0FF0082E062 /* StateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateMachine.swift; sourceTree = "<group>"; };
+		465CEFAA2291E38B0082E062 /* FighterShipWanderState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FighterShipWanderState.swift; sourceTree = "<group>"; };
+		465CEFAE229362C10082E062 /* VectorMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VectorMath.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -156,9 +162,10 @@
 		465CEF89228F17250082E062 /* Objects */ = {
 			isa = PBXGroup;
 			children = (
+				465CEFA52291BB8B0082E062 /* State Machine */,
+				465CEFA42291B6770082E062 /* Fighter Ship */,
 				465CEF87228F151A0082E062 /* BaseObject.swift */,
 				465CEF9B228F775F0082E062 /* MovingObject.swift */,
-				465CEF8A228F17590082E062 /* FighterShip.swift */,
 				465CEFA22290A94E0082E062 /* ObjectManager.swift */,
 			);
 			path = Objects;
@@ -176,10 +183,28 @@
 		465CEF9F228F888B0082E062 /* Useful */ = {
 			isa = PBXGroup;
 			children = (
-				465CEF9D228F84BD0082E062 /* MathAndConversions.swift */,
 				465CEF95228F638E0082E062 /* ConfigurationFile.swift */,
+				465CEFAE229362C10082E062 /* VectorMath.swift */,
 			);
 			path = Useful;
+			sourceTree = "<group>";
+		};
+		465CEFA42291B6770082E062 /* Fighter Ship */ = {
+			isa = PBXGroup;
+			children = (
+				465CEF8A228F17590082E062 /* FighterShip.swift */,
+				465CEFAA2291E38B0082E062 /* FighterShipWanderState.swift */,
+			);
+			path = "Fighter Ship";
+			sourceTree = "<group>";
+		};
+		465CEFA52291BB8B0082E062 /* State Machine */ = {
+			isa = PBXGroup;
+			children = (
+				465CEFA62291BBAE0082E062 /* State.swift */,
+				465CEFA82291D0FF0082E062 /* StateMachine.swift */,
+			);
+			path = "State Machine";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -286,10 +311,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				46EBC28522936A1A00CBF2F6 /* GameScene.sks in Resources */,
 				465CEF98228F64660082E062 /* FighterShip.png in Resources */,
 				465CEF92228F4C140082E062 /* Guy.png in Resources */,
 				465CEF5F2283A2720082E062 /* Main.storyboard in Resources */,
-				465CEF562283A2720082E062 /* GameScene.sks in Resources */,
 				465CEF612283A2750082E062 /* Assets.xcassets in Resources */,
 				465CEF642283A2750082E062 /* LaunchScreen.storyboard in Resources */,
 				465CEF582283A2720082E062 /* Actions.sks in Resources */,
@@ -320,12 +345,15 @@
 				465CEF96228F638E0082E062 /* ConfigurationFile.swift in Sources */,
 				465CEF5A2283A2720082E062 /* GameScene.swift in Sources */,
 				465CEF88228F151A0082E062 /* BaseObject.swift in Sources */,
+				465CEFA72291BBAE0082E062 /* State.swift in Sources */,
 				465CEFA32290A94E0082E062 /* ObjectManager.swift in Sources */,
+				46EBC27F229364A800CBF2F6 /* VectorMath.swift in Sources */,
 				465CEF5C2283A2720082E062 /* GameViewController.swift in Sources */,
+				465CEFA92291D0FF0082E062 /* StateMachine.swift in Sources */,
 				465CEF9C228F775F0082E062 /* MovingObject.swift in Sources */,
 				465CEF542283A2720082E062 /* AppDelegate.swift in Sources */,
 				465CEF8B228F17590082E062 /* FighterShip.swift in Sources */,
-				465CEF9E228F84BD0082E062 /* MathAndConversions.swift in Sources */,
+				465CEFAB2291E38B0082E062 /* FighterShipWanderState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

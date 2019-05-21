@@ -9,29 +9,20 @@
 import Foundation
 import SpriteKit
 
-class MovingObject: BaseObject {
+class MovingObject: BaseObject, VectorMath {
     
     // Things an object needs to move around
-    internal var velocity: CGFloat = 0.0
+    var velocity: CGFloat = 0.0
     
     // Initializer
-    override init() {
-        super.init()
+    override init(position: CGPoint?, heading: CGFloat = 0.0, team: Int = Config.Team.NoTeam) {
+        super.init(position: position, heading: heading, team: team)
     }
     
-    // Add this object to the scene, must be called by subclass
-    override func addToScene() -> SKNode? {
-        print("MovingObject addToScene - shouldn't see this")
-        return nil
-    }
-    
-    // Update function
-    override func update() -> Bool {
-        return super.update()
-    }
-    
-    // Get a unique name for the object, this version should be overwritten
-    override func getUniqueName() -> String {
-        return ""
+    // Move the object from the current coordinate to a new coordinate by the velocity
+    func travelOnPath() {
+        // Update the position based on 2D vector math
+        self.position.x = self.position.x + (self.velocity * cos(DegreesToRads(degrees: self.heading)))
+        self.position.y = self.position.y + (self.velocity * sin(DegreesToRads(degrees: self.heading)))
     }
 }
