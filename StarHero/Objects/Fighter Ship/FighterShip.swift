@@ -10,36 +10,39 @@ import Foundation
 import SpriteKit
 
 class FighterShip: MovingObject {
-    // Name of this type of object
-    static let objectType: String = "FighterShip"
-    
     // Sprite for fighter ships
     private let fighterShipNode = SKSpriteNode(imageNamed: Config.FighterShipLocation)
     
     // The fighter ship state machine
-    private var stateMachine: StateMachine?
+    var stateMachine: StateMachine?
     
     // Initialize the fighter ship
-    override init(position: CGPoint?, heading: CGFloat = 0.0, team: Int = Config.Team.NoTeam) {
-        super.init(position: position, heading: heading, team: team)
-        
-        // Set the node's position and heading
-        self.fighterShipNode.position = coordToCGPoint(x: self.position.x, y: self.position.y)
-        self.fighterShipNode.zRotation = ConvertHeadingToSpriteRotation(heading: self.heading)
+    override init(position: CGPoint?, facingDegrees: CGFloat = 0.0, team: Int = Config.Team.NoTeam) {
+        super.init(position: position, facingDegrees: facingDegrees, team: team)
         
         // Overwrite with config velocity for a fighter ship
-        self.velocity = Config.FighterShipVelocity
+        mass = Config.FighterShipMass
+        maxSpeed = Config.FighterShipMaxSpeed
+        takeoffSpeed = Config.FighterShipTakeoffSpeed
+        maxForce = Config.FighterShipMaxForce
+        
+        // Set the node's position and heading
+        self.updateNode()
+        
+        // Grab the size of the node
+        radius = (fighterShipNode.size.width + fighterShipNode.size.height) / 4
         
         //Set the team color
-        self.fighterShipNode.color = Config.getTeamColor(team: self.team)
-        self.fighterShipNode.colorBlendFactor = 1
+        fighterShipNode.scale(to: CGSize(width: 30, height: 60))
+        fighterShipNode.color = Config.getTeamColor(team: self.team)
+        fighterShipNode.colorBlendFactor = 1
         
         // Set the name for this instance and for the sprite node
-        self.name = getUniqueName(objectType: FighterShip.objectType)
-        self.fighterShipNode.name = self.name
+        name = getUniqueName()
+        fighterShipNode.name = name
         
         // Initialize the state machine
-        stateMachine = StateMachine(object: self, currentState: FighterShipWanderState.sharedInstance, previousState: FighterShipWanderState.sharedInstance)
+        stateMachine = StateMachine(object: self)
         stateMachine?.changeState(newState: FighterShipWanderState.sharedInstance)
         
         print("Initialized \(self.name!)")
@@ -48,45 +51,45 @@ class FighterShip: MovingObject {
     // Setup this fighter ship's sprite node and return it to the scene to be added
     override func addToScene() -> SKSpriteNode? {
         // If fighter ship is already active, node dosent need to be added to scene
-        if self.isActive {
+        if isActive {
             return nil
         }
         
         // Activate the node and pass it back to be added to the scene
-        self.isActive = true
+        isActive = true
         return fighterShipNode
     }
     
     // Destroy this fighter ship
     override func destroy() {
-        print("Destroying \(name!)")
-        self.fighterShipNode.removeFromParent()
+        fighterShipNode.removeFromParent()
     }
     
     // Update function, return true if update successful, return false if this object is ready to be terminated
-    override func update() -> Bool {
+    override func update(dTime: TimeInterval) -> Bool {
         // If superclass indicates deletion, return false
-        if !super.update() || !self.isActive {
+        if !isActive {
             return false
         }
         
-        stateMachine?.update()
+        // Update the fighter ship with the current state
+        stateMachine?.update(dTime: dTime)
         
         return true
     }
     
-    override func travelOnPath() {
-        super.travelOnPath()
-        self.fighterShipNode.position = coordToCGPoint(x: self.position.x, y: self.position.y)
+    override func inputTouchDown(touchPos: CGPoint) {
+        // Setup the steering behavior and then change the state to seek
+        self.steeringBehavior!.setToSeek(target: Vector(point: touchPos))
+        stateMachine?.changeState(newState: FighterShipMoveState.sharedInstance)
     }
     
-    override func handleInput(touchPos: CGPoint) {
-        self.heading = GetDirection(firstPoint: CGPoint(x: self.position.x, y: self.position.y), secondPoint: touchPos)
-        self.fighterShipNode.zRotation = ConvertHeadingToSpriteRotation(heading: self.heading)
-    }
-    
-    // Get the object's state machine
-    override func getStateMachine() -> StateMachine? {
-        return stateMachine
+    // Update the node with the current heading and position
+    override func updateNode() {
+        // Simply apply the position to the node
+        fighterShipNode.position = CGPoint(x: position.x, y: position.y)
+        
+        // Convert from x,y coordinates that start at the right to one that starts at the top
+        fighterShipNode.zRotation = heading.toRads() - degreesToRads(degrees: 90)
     }
 }

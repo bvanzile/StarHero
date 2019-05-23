@@ -16,5 +16,5 @@ protocol State {
     func exit(object: BaseObject)
     
     // Function for updating a state
-    func execute(object: BaseObject)
+    func execute(object: BaseObject, dTime: TimeInterval)
 }

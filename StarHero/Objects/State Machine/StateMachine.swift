@@ -35,8 +35,8 @@ class StateMachine {
     func getPreviousState() -> State? { return previousState }
     
     // Call the current state execution function
-    func update() {
-        currentState?.execute(object: objectOwner)
+    func update(dTime: TimeInterval) {
+        currentState?.execute(object: objectOwner, dTime: dTime)
     }
     
     //
@@ -46,7 +46,7 @@ class StateMachine {
             // Update the previous state
             previousState = currentState
             
-            // Run the current state's exit method
+            // Run the current state's exit method if it exists
             currentState?.exit(object: objectOwner)
             
             // Update the current state with the input new state

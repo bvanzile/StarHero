@@ -20,11 +20,20 @@ struct Config {
     static var FieldWidth: CGFloat = 0.0
     static var FieldHeight: CGFloat = 0.0
     
+    // Types of screen touches
+    static let TouchUp: Int = 0
+    static let TouchDown: Int = 1
+    static let TouchMoved: Int = 2
+    
     // Sprite image locations
     static let FighterShipLocation: String = "FighterShip"
     
     // Fighter ship configurations
-    static let FighterShipVelocity: CGFloat = 0.5
+    static let FighterShipMass: CGFloat = 10
+    static let FighterShipMaxSpeed: CGFloat = 100        // Units/second
+    static let FighterShipTakeoffSpeed: CGFloat = 5        // Units/second
+    static let FighterShipMaxForce: CGFloat = 50        // For acceleration/turn rate
+    static let FighterShipDeceleration: CGFloat = 0.8   // Rate of deceleration for an arrival
     
     // Team names
     struct Team {

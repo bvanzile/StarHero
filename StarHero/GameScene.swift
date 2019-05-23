@@ -47,15 +47,16 @@ class GameScene: SKScene {
         }
         
         let touchedNode = self.nodes(at: pos)
+        var touchedNodeNames = [String]()
         for n in touchedNode {
             if let myNode = n.name {
-                print("Clicked \(myNode)")
-                ObjectManager.sharedInstance.removeObject(inName: myNode)
+                print("Touched: \(myNode)")
+                touchedNodeNames.append(myNode)
             }
         }
         
         // Pass the along the position that the screen was touched
-        ObjectManager.sharedInstance.screenTouched(pos: pos)
+        ObjectManager.sharedInstance.screenTouched(pos: pos, touchType: Config.TouchDown, touchedNodes: touchedNodeNames)
     }
     
     func touchMoved(toPoint pos : CGPoint) {
@@ -64,6 +65,9 @@ class GameScene: SKScene {
             n.strokeColor = SKColor.blue
             self.addChild(n)
         }
+        
+        // Pass the along the position that the screen was touched
+        ObjectManager.sharedInstance.screenTouched(pos: pos, touchType: Config.TouchMoved)
     }
     
     func touchUp(atPoint pos : CGPoint) {
@@ -72,6 +76,9 @@ class GameScene: SKScene {
             n.strokeColor = SKColor.red
             self.addChild(n)
         }
+        
+        // Pass the along the position that the screen was touched
+        ObjectManager.sharedInstance.screenTouched(pos: pos, touchType: Config.TouchUp)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -90,10 +97,9 @@ class GameScene: SKScene {
         for t in touches { self.touchUp(atPoint: t.location(in: self)) }
     }
     
+    // Called before each frame is rendered
     override func update(_ currentTime: TimeInterval) {
-        // Called before each frame is rendered
-        
         // Update the game objects
-        ObjectManager.sharedInstance.update()
+        ObjectManager.sharedInstance.update(currentTime: currentTime)
     }
 }

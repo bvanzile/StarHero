@@ -1,16 +1,16 @@
 //
-//  FighterShipWanderState.swift
+//  FighterShipReturnToFieldState.swift
 //  StarHero
 //
-//  Created by Bryan Van Zile on 5/19/19.
+//  Created by Bryan Van Zile on 5/22/19.
 //  Copyright © 2019 Bryan Van Zile. All rights reserved.
 //
 
 import Foundation
 
-class FighterShipWanderState: State {
+class FighterShipReturnToFieldState: State {
     // Singleton instance to pass to the state machine
-    static var sharedInstance: FighterShipWanderState = FighterShipWanderState()
+    static var sharedInstance: FighterShipReturnToFieldState = FighterShipReturnToFieldState()
     
     // Initializer, private as this shouldn't be initialized outside of the singleton
     private init() { }
@@ -18,8 +18,8 @@ class FighterShipWanderState: State {
     // Function for entering into a state
     func enter(object: BaseObject) {
         if let fighterShip = object as? FighterShip {
-            print("\(fighterShip.name!) entering wander state")
-            fighterShip.steeringBehavior?.setToWander()
+            print("\(fighterShip.name!) has started returning to the field")
+            fighterShip.steeringBehavior?.setToSeek(target: Vector(x: 0, y: 0))
         }
     }
     
@@ -38,8 +38,8 @@ class FighterShipWanderState: State {
             fighterShip.updateNode()
             
             // When we return in bounds, go back to wandering
-            if(fighterShip.isOutOfBounds()) {
-                fighterShip.stateMachine?.changeState(newState: FighterShipReturnToFieldState.sharedInstance)
+            if(!fighterShip.isOutOfBounds()) {
+                fighterShip.stateMachine?.changeState(newState: FighterShipWanderState.sharedInstance)
             }
         }
     }

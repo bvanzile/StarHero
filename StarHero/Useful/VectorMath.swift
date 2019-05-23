@@ -9,14 +9,49 @@
 import Foundation
 import SpriteKit
 
-// Simple vector
+// Simple 2D vector
 struct Vector: VectorMath {
+    // Properties used in a 2D vector
     var x: CGFloat = 0
     var y: CGFloat = 0
     
+    // Initialize a vector with 2 values
+    init(x: CGFloat, y: CGFloat) {
+        self.x = x
+        self.y = y
+    }
+    
+    // Initialize a vector from a CGPoint
+    init(point: CGPoint) {
+        x = point.x
+        y = point.y
+    }
+    
+    // Initialize based on degrees
+    init(degrees: CGFloat) {
+        x = cos(degreesToRads(degrees: degrees))
+        y = sin(degreesToRads(degrees: degrees))
+    }
+    
+    // Initialize based on degrees
+    init(rads: CGFloat) {
+        x = cos(rads)
+        y = sin(rads)
+    }
+    
+    // Default to 0, 0
+    init() { }
+    
+    // The vector magnitude
+    func length() -> CGFloat {
+        return CGFloat((x * x) + (y * y)).squareRoot()
+    }
+    
+    // Normalize vector to length of 1
     func normalize() -> Vector {
-        let magnitude = ((x * x) + (y * y)).squareRoot()
+        let magnitude = self.length()
         if magnitude == 0 {
+            // Return 0 vector, keep in mind to avoid divide by 0 later on
             return self
         }
         else {
@@ -24,29 +59,83 @@ struct Vector: VectorMath {
         }
     }
     
-    func magnitude() -> CGFloat {
-        return CGFloat((x * x) + (y * y)).squareRoot()
+    // Overload the * operator for multiplication
+    static func *(left: Vector, right: CGFloat) -> Vector {
+        return Vector(x: left.x * right, y: left.y * right)
     }
     
-    func multiply(value: CGFloat) -> Vector {
-        return Vector(x: x * value, y: y * value)
+    // Overload the * operator for multiplication
+    static func /(left: Vector, right: CGFloat) -> Vector {
+        return Vector(x: left.x / right, y: left.y / right)
     }
     
-    func add(vector: Vector) -> Vector {
-        return Vector(x: x + vector.x, y: y + vector.y)
+    // Overload the + operator for vector addition
+    static func +(left: Vector, right: Vector) -> Vector {
+        return Vector(x: left.x + right.x, y: left.y + right.y)
+    }
+    
+    // Overload the - operator for vector addition
+    static func -(left: Vector, right: Vector) -> Vector {
+        return Vector(x: left.x - right.x, y: left.y - right.y)
     }
     
     func dotProductRads(vector: Vector) -> CGFloat {
         let thisVectorNormalized = self.normalize()
         let otherVectorNormalized = vector.normalize()
-        print ("\(thisVectorNormalized) and \(otherVectorNormalized)")
+        
         return acos((thisVectorNormalized.x * otherVectorNormalized.x) + (thisVectorNormalized.y * otherVectorNormalized.y))
     }
     
     func dotProductDegrees(vector: Vector) -> CGFloat {
         let thisVectorNormalized = self.normalize()
         let otherVectorNormalized = vector.normalize()
-        return RadsToDegrees(rads: acos((thisVectorNormalized.x * otherVectorNormalized.x) + (thisVectorNormalized.y * otherVectorNormalized.y)))
+        
+        return radsToDegrees(rads: acos((thisVectorNormalized.x * otherVectorNormalized.x) + (thisVectorNormalized.y * otherVectorNormalized.y)))
+    }
+    
+    // Return the vector that is perpindicular and to the right (clockwise)
+    func perpendicularRight() -> Vector {
+        return Vector(x: y, y: -x)
+    }
+    
+    // Return the vector that is perpindicular and to the right (clockwise)
+    func perpendicularLeft() -> Vector {
+        return Vector(x: -y, y: x)
+    }
+    
+    // Returns the reverse of this vector
+    func reverse() -> Vector {
+        return Vector(x: -x, y: -y)
+    }
+    
+    // Adjusts the vector so that it does not exceed the input
+    func truncate(value: CGFloat) -> Vector {
+        // Check if the length of the vector is greater than the input
+        if(self.length() > value) {
+            // If so, normalize and change to desired length
+            return self.normalize() * value
+        }
+        return self
+    }
+    
+    // Distance between this vetor and the one passed in argument
+    func distanceBetween(vector: Vector) -> CGFloat {
+        return (self - vector).length()
+    }
+    
+    // Convert vector to degrees
+    func toRads() -> CGFloat {
+        return atan2(y, x)
+    }
+    
+    // Convert vector to degrees
+    func toDegrees() -> CGFloat {
+        return radsToDegrees(rads: atan2(y, x))
+    }
+    
+    // Return this vector as a CGPoint
+    func toCGPoint() -> CGPoint {
+        return CGPoint(x: x, y: y)
     }
 }
 
@@ -54,28 +143,42 @@ struct Vector: VectorMath {
 protocol VectorMath { }
 
 extension VectorMath {
+    // Reusable function for receving a normalized vector that represents an angle in degrees
+    func angleToVector(degrees: CGFloat) -> Vector {
+        return Vector(x: cos(degreesToRads(degrees: degrees)), y: sin(degreesToRads(degrees: degrees)))
+    }
+    // Reusable function for receving a normalized vector that represents an angle in degrees
+    func angleToVector(rads: CGFloat) -> Vector {
+        return Vector(x: cos(rads), y: sin(rads))
+    }
+    
+    // Converts degrees to radians
+    func degreesToRads(degrees: CGFloat) -> CGFloat {
+        return degrees * (.pi / 180.0)
+    }
+    
+    // Converts radians to degrees
+    func radsToDegrees(rads: CGFloat) -> CGFloat {
+        return rads * (180.0 / .pi)
+    }
+    
     // Reusable function for taking separated coordinates and returning a CGPoint object
     func coordToCGPoint(x: CGFloat, y: CGFloat) -> CGPoint {
         return CGPoint(x: x, y: y)
     }
     
+    // Reusable function for taking separated coordinates and returning a CGPoint object
+    func vectorToCGPoint(vector: Vector) -> CGPoint {
+        return CGPoint(x: vector.x, y: vector.y)
+    }
+    
     // Convert the heading direction to the sprite's necessary rotation
     func ConvertHeadingToSpriteRotation(heading: CGFloat) -> CGFloat {
-        return self.DegreesToRads(degrees: heading + 90.0)
-    }
-    
-    // Converts degrees to radians
-    func DegreesToRads(degrees: CGFloat) -> CGFloat {
-        return -degrees * (.pi / 180.0)
-    }
-    
-    // Converts radians to degrees
-    func RadsToDegrees(rads: CGFloat) -> CGFloat {
-        return -rads * (180.0 / .pi)
+        return self.degreesToRads(degrees: heading + 90.0)
     }
     
     // Finds the angle between 2 points
     func GetDirection(firstPoint: CGPoint, secondPoint: CGPoint) -> CGFloat {
-        return self.RadsToDegrees(rads: atan2(secondPoint.y - firstPoint.y, secondPoint.x - firstPoint.x))
+        return self.radsToDegrees(rads: atan2(secondPoint.y - firstPoint.y, secondPoint.x - firstPoint.x))
     }
 }

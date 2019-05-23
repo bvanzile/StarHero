@@ -28,6 +28,10 @@
 		465CEFAB2291E38B0082E062 /* FighterShipWanderState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEFAA2291E38B0082E062 /* FighterShipWanderState.swift */; };
 		46EBC27F229364A800CBF2F6 /* VectorMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEFAE229362C10082E062 /* VectorMath.swift */; };
 		46EBC28522936A1A00CBF2F6 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 465CEF552283A2720082E062 /* GameScene.sks */; };
+		46EBC2BB2294870F00CBF2F6 /* SteeringBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EBC2BA2294870F00CBF2F6 /* SteeringBehavior.swift */; };
+		46EBC2BD22948D9400CBF2F6 /* FighterShipIdleState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EBC2BC22948D9400CBF2F6 /* FighterShipIdleState.swift */; };
+		46EBC2C5229605E800CBF2F6 /* FighterShipMoveState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EBC2C4229605E800CBF2F6 /* FighterShipMoveState.swift */; };
+		46EBC2C7229625E800CBF2F6 /* FighterShipReturnToFieldState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46EBC2C6229625E800CBF2F6 /* FighterShipReturnToFieldState.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -75,6 +79,10 @@
 		465CEFA82291D0FF0082E062 /* StateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateMachine.swift; sourceTree = "<group>"; };
 		465CEFAA2291E38B0082E062 /* FighterShipWanderState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FighterShipWanderState.swift; sourceTree = "<group>"; };
 		465CEFAE229362C10082E062 /* VectorMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VectorMath.swift; sourceTree = "<group>"; };
+		46EBC2BA2294870F00CBF2F6 /* SteeringBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SteeringBehavior.swift; sourceTree = "<group>"; };
+		46EBC2BC22948D9400CBF2F6 /* FighterShipIdleState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FighterShipIdleState.swift; sourceTree = "<group>"; };
+		46EBC2C4229605E800CBF2F6 /* FighterShipMoveState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FighterShipMoveState.swift; sourceTree = "<group>"; };
+		46EBC2C6229625E800CBF2F6 /* FighterShipReturnToFieldState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FighterShipReturnToFieldState.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -164,8 +172,9 @@
 			children = (
 				465CEFA52291BB8B0082E062 /* State Machine */,
 				465CEFA42291B6770082E062 /* Fighter Ship */,
-				465CEF87228F151A0082E062 /* BaseObject.swift */,
+				46EBC2BA2294870F00CBF2F6 /* SteeringBehavior.swift */,
 				465CEF9B228F775F0082E062 /* MovingObject.swift */,
+				465CEF87228F151A0082E062 /* BaseObject.swift */,
 				465CEFA22290A94E0082E062 /* ObjectManager.swift */,
 			);
 			path = Objects;
@@ -192,8 +201,11 @@
 		465CEFA42291B6770082E062 /* Fighter Ship */ = {
 			isa = PBXGroup;
 			children = (
-				465CEF8A228F17590082E062 /* FighterShip.swift */,
+				46EBC2C6229625E800CBF2F6 /* FighterShipReturnToFieldState.swift */,
 				465CEFAA2291E38B0082E062 /* FighterShipWanderState.swift */,
+				46EBC2C4229605E800CBF2F6 /* FighterShipMoveState.swift */,
+				46EBC2BC22948D9400CBF2F6 /* FighterShipIdleState.swift */,
+				465CEF8A228F17590082E062 /* FighterShip.swift */,
 			);
 			path = "Fighter Ship";
 			sourceTree = "<group>";
@@ -343,13 +355,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				465CEF96228F638E0082E062 /* ConfigurationFile.swift in Sources */,
+				46EBC2BD22948D9400CBF2F6 /* FighterShipIdleState.swift in Sources */,
 				465CEF5A2283A2720082E062 /* GameScene.swift in Sources */,
 				465CEF88228F151A0082E062 /* BaseObject.swift in Sources */,
 				465CEFA72291BBAE0082E062 /* State.swift in Sources */,
 				465CEFA32290A94E0082E062 /* ObjectManager.swift in Sources */,
+				46EBC2BB2294870F00CBF2F6 /* SteeringBehavior.swift in Sources */,
 				46EBC27F229364A800CBF2F6 /* VectorMath.swift in Sources */,
 				465CEF5C2283A2720082E062 /* GameViewController.swift in Sources */,
 				465CEFA92291D0FF0082E062 /* StateMachine.swift in Sources */,
+				46EBC2C5229605E800CBF2F6 /* FighterShipMoveState.swift in Sources */,
+				46EBC2C7229625E800CBF2F6 /* FighterShipReturnToFieldState.swift in Sources */,
 				465CEF9C228F775F0082E062 /* MovingObject.swift in Sources */,
 				465CEF542283A2720082E062 /* AppDelegate.swift in Sources */,
 				465CEF8B228F17590082E062 /* FighterShip.swift in Sources */,
