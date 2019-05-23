@@ -18,7 +18,7 @@ class FighterShipWanderState: State {
     // Function for entering into a state
     func enter(object: BaseObject) {
         if let fighterShip = object as? FighterShip {
-            print("\(fighterShip.name!) entering wander state")
+            //print("\(fighterShip.name!) entering wander state")
             fighterShip.steeringBehavior?.setToWander()
         }
     }

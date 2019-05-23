@@ -10,22 +10,28 @@ import Foundation
 import SpriteKit
 
 class ObjectManager {
+    // Singleton setup
+    static let sharedInstance = ObjectManager()
+    
     // Time when the update function was last called
     private var lastTime: TimeInterval = 0
     
-    // Object management singleton
-    static let sharedInstance = ObjectManager()
+    // The game scene that owns this object manager
+    private var gameScene: GameScene?
     
     // All game objects
     private var objects: [String: BaseObject] = [String: BaseObject]()
     
+    // A queue to manage contact physics from the game scene
+    private var contactQueue = [SKPhysicsContact]()
+    
     // Initializer
     private init() {
         // Setting up 2 ships for testing
-        let ship1 = FighterShip(position: CGPoint(x: -200, y: 200), facingDegrees: 135.0, team: Config.Team.RedTeam)
-        let ship2 = FighterShip(position: CGPoint(x: 200, y: 200), facingDegrees: 315.0, team: Config.Team.BlueTeam)
-        let ship3 = FighterShip(position: CGPoint(x: -200, y: -200), facingDegrees: 135.0, team: Config.Team.OrangeTeam)
-        let ship4 = FighterShip(position: CGPoint(x: 200, y: -200), facingDegrees: 315.0, team: Config.Team.GreenTeam)
+        let ship1 = FighterShip(position: Vector(x: -200, y: 200), heading: Vector(degrees: 90.0), team: Config.Team.RedTeam)
+        let ship2 = FighterShip(position: Vector(x: 200, y: 200), heading: Vector(degrees: 90.0), team: Config.Team.BlueTeam)
+        let ship3 = FighterShip(position: Vector(x: -200, y: -200), heading: Vector(degrees: 270.0), team: Config.Team.OrangeTeam)
+        let ship4 = FighterShip(position: Vector(x: 200, y: -200), heading: Vector(degrees: 270.0), team: Config.Team.GreenTeam)
         
         objects[ship1.name!] = ship1
         objects[ship2.name!] = ship2
@@ -34,20 +40,21 @@ class ObjectManager {
     }
     
     // Setup the scene with objects
-    func setup() -> [SKNode] {
-        var nodes: [SKNode] = [SKNode]()
+    func setup(scene: GameScene) {
+        self.gameScene = scene
         
         for (_, object) in objects {
             if let n = object.addToScene() {
-                nodes.append(n)
+                gameScene?.addChild(n)
             }
         }
-        
-        return nodes
     }
     
     // Update all of the active objects
     func update(currentTime: TimeInterval) {
+        // Handle all of the contacts picked up by the game scene
+        self.processContacts()
+        
         let timeDelta = lastTime == 0 ? 0.01 : currentTime - lastTime
         lastTime = currentTime
         
@@ -58,6 +65,17 @@ class ObjectManager {
                 self.removeObject(inName: key)
             }
         }
+    }
+    
+    // Callback for any function to use to add an object and node to the game scene
+    @discardableResult
+    func addObject(object: BaseObject) -> Bool {
+        if let n = object.addToScene() {
+            objects[object.name!] = object
+            gameScene?.addChild(n)
+        }
+        
+        return true
     }
     
     // Delete the passed through object
@@ -89,11 +107,18 @@ class ObjectManager {
             if !touchedNodes.isEmpty {
                 // Currently, delete any objects that were touched
                 for name in touchedNodes {
-                    objects[name]?.isActive = false
+                    // Take action if the pause button was pressed
+                    if(name == "pauseButton") {
+                        let ship = FighterShip(position: Vector(x: CGFloat.random(in: -Config.FieldWidth/2...Config.FieldWidth/2), y: CGFloat.random(in: -Config.FieldHeight/2...Config.FieldHeight/2)), heading: Vector(degrees: CGFloat.random(in: 0...360)), team: Config.Team.RandomTeam)
+                        addObject(object: ship)
+                    }
+                    else {
+                        objects[name]?.inputTouchDown(touchPos: pos)
+                    }
                 }
             }
             else {
-                // Update all of the game nodes with the input
+                // Update all of the game nodes with the input, temporary so they all try to fire a missile
                 for (_, object) in objects {
                     object.inputTouchDown(touchPos: pos)
                 }
@@ -113,5 +138,37 @@ class ObjectManager {
             print("No input type, shouldn't be called")
             break
         }
+    }
+    
+    // Process all of the contacts in the queue and perform the necessary interactions
+    func handleContacts(contact: SKPhysicsContact) {
+        // Check if this contact has already been handled or if both nodes still exist
+        if contact.bodyA.node?.parent == nil || contact.bodyB.node?.parent == nil {
+            return
+        }
+        
+        // Unwrap both node names and make sure they exist
+        if let firstNodeName = contact.bodyA.node?.name, let secondNodeName = contact.bodyB.node?.name {
+            // Have each of the nodes handle the collission
+            objects[firstNodeName]?.handleCollision(objects[secondNodeName])
+            objects[secondNodeName]?.handleCollision(objects[firstNodeName])
+            print("\(firstNodeName) has contacted with \(secondNodeName)")
+        }
+    }
+    
+    // Iterate through the contacts in the queue and handle them
+    func processContacts() {
+        for contact in contactQueue {
+            handleContacts(contact: contact)
+            
+            if let index = contactQueue.firstIndex(of: contact) {
+                contactQueue.remove(at: index)
+            }
+        }
+    }
+    
+    // Get a collision from the game scene to process in the update function
+    func addContactToQueue(contact: SKPhysicsContact) {
+        contactQueue.append(contact)
     }
 }

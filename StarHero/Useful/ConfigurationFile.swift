@@ -25,15 +25,50 @@ struct Config {
     static let TouchDown: Int = 1
     static let TouchMoved: Int = 2
     
-    // Sprite image locations
-    static let FighterShipLocation: String = "FighterShip"
+    // Different layers of the game scene (zPosition)
+    struct RenderPriority {
+        static let TopLevelMenu: CGFloat = 2.0
+        static let GameFront: CGFloat = 1.0
+        static let GameDefault: CGFloat = 0.0
+        static let GameBottom: CGFloat = -1.0
+    }
     
-    // Fighter ship configurations
-    static let FighterShipMass: CGFloat = 10
+    // Collision detection: bitmask categories
+    struct BitMaskCategory {
+        static let Missile: UInt32 = 0x1 << 0
+        static let FighterShip: UInt32 = 0x1 << 1
+        static let MotherShip: UInt32 = 0x1 << 2
+        static let Drone: UInt32 = 0x1 << 3
+        static let All: UInt32 = UInt32.max
+    }
+    
+    // For the game pause button
+    static let PauseButtonAlpha: CGFloat = 0.5
+    
+    // Sprite image locations
+    static let FighterShipLocation: String = "FighterShipDetailed"
+    static let FighterShipScale: CGFloat = 0.4           // Factor to scale the fighter ship to from image size to screen size
+    
+    // Fighter ship physics configurations
+    static let FighterShipMass: CGFloat = 15             // Weight of the ship for movement physics
     static let FighterShipMaxSpeed: CGFloat = 100        // Units/second
-    static let FighterShipTakeoffSpeed: CGFloat = 5        // Units/second
-    static let FighterShipMaxForce: CGFloat = 50        // For acceleration/turn rate
-    static let FighterShipDeceleration: CGFloat = 0.8   // Rate of deceleration for an arrival
+    static let FighterShipTakeoffSpeed: CGFloat = 5      // Units/second
+    static let FighterShipMaxForce: CGFloat = 50         // For acceleration/turn rate
+    static let FighterShipDeceleration: CGFloat = 0.8    // Rate of deceleration for an arrival, higher is faster
+    
+    // Special fighter ship configurations
+    static let FighterShipMaxMissileCount: Int = 2
+    
+    // Missile constants
+    static let MissileLocation: String = "Missile"
+    static let MissileScale: CGFloat = 0.2
+    
+    // Missile physics
+    static let MissileMass: CGFloat = 1
+    static let MissileMaxSpeed: CGFloat = 500
+    static let MissileTakeoffSpeed: CGFloat = 0.0
+    static let MissileMaxForce: CGFloat = 100
+    static let MissileDeceleration: CGFloat = 0.1
     
     // Team names
     struct Team {
@@ -42,6 +77,7 @@ struct Config {
         static let GreenTeam: Int = 2
         static let OrangeTeam: Int = 3
         static let NoTeam: Int = 4
+        static let RandomTeam: Int = 5
     }
     
     // Colors used

@@ -9,9 +9,12 @@
 import SpriteKit
 import GameplayKit
 
-class GameScene: SKScene {
+class GameScene: SKScene, SKPhysicsContactDelegate {
     // The drawing node created with the default project when pressing the screen
     private var spinnyNode : SKShapeNode?
+    
+    // The pause button
+    private var pauseButton: SKShapeNode?
     
     override func didMove(to view: SKView) {
         print("didMove")
@@ -20,8 +23,13 @@ class GameScene: SKScene {
         Config.updateFieldDimenstions(fieldWidth: self.size.width, fieldHieght: self.size.height)
         
         // Set up the object manager for this game scene
-        for node in ObjectManager.sharedInstance.setup() {
-            self.addChild(node)
+        ObjectManager.sharedInstance.setup(scene: self)
+        
+        // Get the pause button and store it for later
+        self.pauseButton = self.childNode(withName: "//pauseButton") as? SKShapeNode
+        if let pauseButton = self.pauseButton {
+            pauseButton.zPosition = Config.RenderPriority.TopLevelMenu
+            print("Inititialized pause button")
         }
         
         // Create shape node to use during mouse interaction
@@ -30,16 +38,20 @@ class GameScene: SKScene {
         
         if let spinnyNode = self.spinnyNode {
             spinnyNode.lineWidth = 2.5
+            spinnyNode.zPosition = 5.0
             
             spinnyNode.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(Double.pi), duration: 1)))
             spinnyNode.run(SKAction.sequence([SKAction.wait(forDuration: 0.5),
                                               SKAction.fadeOut(withDuration: 0.5),
                                               SKAction.removeFromParent()]))
         }
+        
+        // Set the scene as the contact delegate of the physics engine
+        physicsWorld.contactDelegate = self
     }
     
     func touchDown(atPoint pos : CGPoint) {
-        print("touchDown at \(pos)")
+        print("Touched screen at \(Int(pos.x)), \(Int(pos.y))")
         if let n = self.spinnyNode?.copy() as! SKShapeNode? {
             n.position = pos
             n.strokeColor = SKColor.green
@@ -52,6 +64,19 @@ class GameScene: SKScene {
             if let myNode = n.name {
                 print("Touched: \(myNode)")
                 touchedNodeNames.append(myNode)
+                
+                // Pause button overrides everything
+                if(myNode == "pauseButton") {
+                    // Give a fancy little action to the pause button
+                    if let pauseButton = self.pauseButton {
+                        pauseButton.run(SKAction.sequence([SKAction.fadeIn(withDuration: 0.1), SKAction.fadeAlpha(to: Config.PauseButtonAlpha, duration: 0.2)]))
+                    }
+                    
+                    // Empty out the touched nodes since the pause button was pressed and we don't care about what else was touched
+                    touchedNodeNames.removeAll()
+                    touchedNodeNames.append(myNode)
+                    break
+                }
             }
         }
         
@@ -60,25 +85,18 @@ class GameScene: SKScene {
     }
     
     func touchMoved(toPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.blue
-            self.addChild(n)
-        }
-        
         // Pass the along the position that the screen was touched
         ObjectManager.sharedInstance.screenTouched(pos: pos, touchType: Config.TouchMoved)
     }
     
     func touchUp(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.red
-            self.addChild(n)
-        }
-        
         // Pass the along the position that the screen was touched
         ObjectManager.sharedInstance.screenTouched(pos: pos, touchType: Config.TouchUp)
+    }
+    
+    // Contact function from SKPhysicsContact
+    func didBegin(_ contact: SKPhysicsContact) {
+        ObjectManager.sharedInstance.addContactToQueue(contact: contact)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

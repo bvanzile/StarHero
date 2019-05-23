@@ -18,7 +18,7 @@ class FighterShipReturnToFieldState: State {
     // Function for entering into a state
     func enter(object: BaseObject) {
         if let fighterShip = object as? FighterShip {
-            print("\(fighterShip.name!) has started returning to the field")
+            //print("\(fighterShip.name!) is returning to the field")
             fighterShip.steeringBehavior?.setToSeek(target: Vector(x: 0, y: 0))
         }
     }

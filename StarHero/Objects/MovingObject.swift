@@ -22,10 +22,11 @@ class MovingObject: BaseObject, VectorMath {
     var takeoffSpeed: CGFloat = 0.0
     var maxSpeed: CGFloat = 0.0
     var maxForce: CGFloat = 0.0
+    var deceleration: CGFloat = 0.0
     
     // Initializer
-    override init(position: CGPoint?, facingDegrees: CGFloat = 0.0, team: Int = Config.Team.NoTeam) {
-        super.init(position: position, facingDegrees: facingDegrees, team: team)
+    override init(position: Vector? = nil, heading: Vector? = nil, team: Int = Config.Team.NoTeam) {
+        super.init(position: position, heading: heading, team: team)
         
         steeringBehavior = SteeringBehavior(object: self)
     }
@@ -56,7 +57,11 @@ class MovingObject: BaseObject, VectorMath {
     
     // Update the node with the current heading and position
     func updateNode() {
-        fatalError("Update node must be overwritten by base class that owns a node")
+        // Simply apply the position to the node
+        self.getNode()?.position = CGPoint(x: position.x, y: position.y)
+        
+        // Convert from x,y coordinates that start at the right to one that starts at the top
+        self.getNode()?.zRotation = heading.toRads() - degreesToRads(degrees: 90)
     }
     
     // Check whether this object is within the boundaries

@@ -10,6 +10,7 @@ import Foundation
 import SpriteKit
 
 enum SteeringBehaviors {
+    case Go
     case Seek
     case Arrive
     case Flee
@@ -38,8 +39,12 @@ class SteeringBehavior {
         self.movingObject = object
     }
     
-    // Set the current behavior
-    func setToIdle() { activeSteeringBehavior = SteeringBehaviors.Idle }
+    // Set the current behavior and target
+    func setToGo(direction: Vector) {
+        activeSteeringBehavior = .Go
+        // Target is a direction way off in the distance
+        targetPosition = direction.normalize() * (Config.FieldWidth * Config.FieldHeight)
+    }
     func setToSeek(target: Vector) {
         activeSteeringBehavior = SteeringBehaviors.Seek
         targetPosition = target
@@ -57,6 +62,7 @@ class SteeringBehavior {
         wanderCircle = movingObject.heading * wanderRadius
         targetPosition = wanderCircle + movingObject.position
     }
+    func setToIdle() { activeSteeringBehavior = SteeringBehaviors.Idle }
     
     // Function for getting the steering force
     func calculateSteeringForce() -> Vector {        
@@ -64,12 +70,15 @@ class SteeringBehavior {
         
         // Get the desired velocity based on the active steering behavior
         switch activeSteeringBehavior {
+        case .Go:
+            desiredVelocity = seek()
+            
         case .Seek:
             // Calculate the desired velocity
-            desiredVelocity = seek(target: targetPosition)
+            desiredVelocity = seek()
             
         case .Arrive:
-            desiredVelocity = arrive(target: targetPosition)
+            desiredVelocity = arrive()
             
             // Return a 0 velocity if arrived
             if(desiredVelocity.length() == 0) {
@@ -103,19 +112,19 @@ class SteeringBehavior {
         return (desiredVelocity - movingObject.velocity).truncate(value: movingObject.maxForce)
     }
 
-    private func seek(target: Vector) -> Vector {
-        return (target - movingObject.position).normalize() * movingObject.maxSpeed
+    private func seek() -> Vector {
+        return (targetPosition - movingObject.position).normalize() * movingObject.maxSpeed
     }
     
-    private func arrive(target: Vector) -> Vector {
+    private func arrive() -> Vector {
         // Get the distance to the target
-        let vectorToTarget = target - movingObject.position
+        let vectorToTarget = targetPosition - movingObject.position
         let distance = vectorToTarget.length()
         
         // Check if we aren't there yet
         if(distance > (movingObject.radius / 10)) {
             // Calculate speed given the desired deceleration rate
-            var speed = distance / Config.FighterShipDeceleration
+            var speed = distance / movingObject.deceleration
             
             // Make sure we aren't moving faster than the max speed
             speed = speed < movingObject.maxSpeed ? speed : movingObject.maxSpeed
@@ -137,6 +146,6 @@ class SteeringBehavior {
         targetPosition = movingObject.position + ((movingObject.heading * wanderDistance) + wanderCircle)
         
         // Return a desired velocity where we seek the position on the wander circle
-        return seek(target: targetPosition)
+        return seek()
     }
 }
