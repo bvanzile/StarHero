@@ -70,15 +70,13 @@ class StateMachine {
         }
     }
     
-//    // Checks if the current state matches the parameter
-//    func isInState(inState: State) -> Bool {
-//        if let currentState = currentState {
-//            if currentState == inState {
-//                return true
-//            }
-//            else {
-//                return false
-//            }
-//        }
-//    }
+    // Checks if the current state matches the parameter
+    func isInState(inState: State) -> Bool {
+        if let currentState = currentState {
+            if object_getClassName(currentState) == object_getClassName(inState) {
+                return true
+            }
+        }
+        return false
+    }
 }

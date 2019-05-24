@@ -15,6 +15,7 @@ enum SteeringBehaviors {
     case Arrive
     case Flee
     case Wander
+    case Pursue
     case Idle
 }
 
@@ -23,10 +24,13 @@ class SteeringBehavior {
     var movingObject: MovingObject
     
     // The current active steering behavior
-    var activeSteeringBehavior: SteeringBehaviors = SteeringBehaviors.Idle
+    private var activeSteeringBehavior: SteeringBehaviors = SteeringBehaviors.Idle
     
     // Target vector
     var targetPosition: Vector = Vector()
+    
+    // For pursuing
+    var pursuedTarget: MovingObject? = nil
     
     // Constants used for wandering behavior
     var wanderCircle: Vector = Vector()
@@ -62,6 +66,10 @@ class SteeringBehavior {
         wanderCircle = movingObject.heading * wanderRadius
         targetPosition = wanderCircle + movingObject.position
     }
+    func setToPursue(target: MovingObject) {
+        activeSteeringBehavior = SteeringBehaviors.Pursue
+        pursuedTarget = target
+    }
     func setToIdle() { activeSteeringBehavior = SteeringBehaviors.Idle }
     
     // Function for getting the steering force
@@ -91,6 +99,10 @@ class SteeringBehavior {
         case .Wander:
             desiredVelocity = wander()
             
+        case .Pursue:
+            desiredVelocity = pursue()
+            break
+            
         case .Idle: // .Idle
             return desiredVelocity
         }
@@ -114,6 +126,10 @@ class SteeringBehavior {
 
     private func seek() -> Vector {
         return (targetPosition - movingObject.position).normalize() * movingObject.maxSpeed
+    }
+    
+    private func seek(target: Vector) -> Vector {
+        return (target - movingObject.position).normalize() * movingObject.maxSpeed
     }
     
     private func arrive() -> Vector {
@@ -147,5 +163,25 @@ class SteeringBehavior {
         
         // Return a desired velocity where we seek the position on the wander circle
         return seek()
+    }
+    
+    private func pursue() -> Vector {
+        if let target = pursuedTarget {
+            // Vector to the pursued object's current position
+            let distanceToTarget = target.position - movingObject.position
+            
+            // Relative heading
+            let relativeHeading = movingObject.heading.dotProductRads(vector: target.heading)
+            
+            if distanceToTarget.dotProductRads(vector: target.heading) > 0 && relativeHeading < 0.95 {
+                return seek(target: target.position)
+            }
+            
+            let lookAheadTime = distanceToTarget.length() / Config.MissileMaxSpeed //((movingObject.maxSpeed + target.velocity.length()) * 1)
+            
+            return seek(target: target.position + (target.velocity * lookAheadTime))
+        }
+        
+        return Vector()
     }
 }

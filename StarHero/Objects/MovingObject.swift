@@ -65,9 +65,9 @@ class MovingObject: BaseObject, VectorMath {
     }
     
     // Check whether this object is within the boundaries
-    func isOutOfBounds() -> Bool {
+    func isOutOfBounds(scale: CGFloat = 1.0) -> Bool {
         // Check if the ship has moved out of bounds and change the state to return
-        if((position.x * position.x) > ((Config.FieldWidth / 2) * (Config.FieldWidth / 2)) || (position.y * position.y) > ((Config.FieldHeight / 2) * (Config.FieldHeight / 2))) {
+        if((position.x * position.x) > ((Config.FieldWidth / 2) * (Config.FieldWidth / 2) * scale) || (position.y * position.y) > ((Config.FieldHeight / 2) * (Config.FieldHeight / 2)) * scale) {
             return true
         }
         return false

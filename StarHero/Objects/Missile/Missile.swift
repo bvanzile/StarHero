@@ -47,7 +47,7 @@ class Missile: MovingObject {
         radius = (missileNode.size.width + missileNode.size.height) / 4
         
         // Set the name for this instance and for the sprite node
-        name = getUniqueName()
+        name = self.missileOwner + "." + getUniqueName()
         missileNode.name = name
         
         // Initialize the physics body used for collision detection
@@ -61,13 +61,13 @@ class Missile: MovingObject {
         // Setup the missile's steering behavior, go in the direction it was facing when created
         steeringBehavior?.setToGo(direction: self.heading)
         
-        print("Initialized \(self.name!)")
+        //print("Initialized \(self.name!)")
     }
     
     // Update function, return true if update successful, return false if this object is ready to be terminated
     override func update(dTime: TimeInterval) -> Bool {
         // If superclass indicates deletion or the missile flew out of bounds, return false
-        if(!isActive || self.isOutOfBounds()) {
+        if(!isActive || self.isOutOfBounds(scale: 1.1)) {
             return false
         }
         
@@ -84,14 +84,14 @@ class Missile: MovingObject {
         // Check if hit by a missile
         if let _ = object as? Missile {
             // If this is someone else's missile, destroy this missile, unlucky
-            isActive = false
+            destroy()
         }
         // Check if collided with a fighter ship
         else if let fighterShip = object as? FighterShip {
             // Check if this ship is the one who launched the missile, no collision should occur
             if(missileOwner != fighterShip.name) {
                 // Ran into another fighter ship, got em, destroy the missile
-                isActive = false
+                destroy()
             }
         }
     }

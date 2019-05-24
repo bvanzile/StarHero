@@ -35,10 +35,11 @@ struct Config {
     
     // Collision detection: bitmask categories
     struct BitMaskCategory {
-        static let Missile: UInt32 = 0x1 << 0
         static let FighterShip: UInt32 = 0x1 << 1
         static let MotherShip: UInt32 = 0x1 << 2
         static let Drone: UInt32 = 0x1 << 3
+        static let Sight: UInt32 = 0x1 << 4
+        static let Missile: UInt32 = 0x1 << 5
         static let All: UInt32 = UInt32.max
     }
     
@@ -55,9 +56,12 @@ struct Config {
     static let FighterShipTakeoffSpeed: CGFloat = 5      // Units/second
     static let FighterShipMaxForce: CGFloat = 50         // For acceleration/turn rate
     static let FighterShipDeceleration: CGFloat = 0.8    // Rate of deceleration for an arrival, higher is faster
+    static let FighterShipSightDistance: CGFloat = 1200.0
+    static let FighterShipSightPeripheral: CGFloat = 70.0
     
     // Special fighter ship configurations
     static let FighterShipMaxMissileCount: Int = 2
+    static let FighterShipReloadCooldown: CGFloat = 1.0
     
     // Missile constants
     static let MissileLocation: String = "Missile"

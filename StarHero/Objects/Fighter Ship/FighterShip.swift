@@ -9,15 +9,22 @@
 import Foundation
 import SpriteKit
 
-class FighterShip: MovingObject {
+class FighterShip: MovingObject, ObjectCanSee {
     // Sprite for fighter ships
     private let fighterShipNode = SKSpriteNode(imageNamed: Config.FighterShipLocation)
+    
+    // Declare the required sight node
+    var sightNode = SKShapeNode()
     
     // The fighter ship state machine
     var stateMachine: StateMachine?
     
+    // Reference to another object that the fighter ship can pursue and attack
+    var target: MovingObject? = nil
+    
     // Count of how many missiles this fighter ship has currently
     var missileCount: Int = Config.FighterShipMaxMissileCount
+    var missileReloadCooldown: CGFloat = 0.0
     
     // Initialize the fighter ship
     override init(position: Vector? = nil, heading: Vector? = nil, team: Int = Config.Team.NoTeam) {
@@ -54,6 +61,15 @@ class FighterShip: MovingObject {
         fighterShipNode.physicsBody?.contactTestBitMask = Config.BitMaskCategory.FighterShip
         fighterShipNode.physicsBody?.collisionBitMask = 0x0
         
+        // Move the sight to be in front of the ship and not visible
+        sightNode.position = CGPoint(x: 0, y: radius + 0.01)
+        sightNode.isHidden = true
+        sightNode.name = self.name! + ".Sight"
+        setupSightPhysicsBody(degrees: Config.FighterShipSightPeripheral, distance: Config.FighterShipSightDistance, canSee: Config.BitMaskCategory.FighterShip + Config.BitMaskCategory.Missile)
+        
+        // Add the sight node to the fighter ship
+        fighterShipNode.addChild(sightNode)
+        
         // Initialize the state machine
         stateMachine = StateMachine(object: self)
         stateMachine?.changeState(newState: FighterShipWanderState.sharedInstance)
@@ -63,12 +79,17 @@ class FighterShip: MovingObject {
     
     // Fire a missile at the current direction we are facing
     func fireMissile() {
-        if(missileCount > 0) {
-            ObjectManager.sharedInstance.addObject(object: Missile(owner: name!, position: position, heading: heading))
-            //missileCount -= 1
-        }
-        else {
-            fullyReloadMissiles()
+        if missileReloadCooldown <= 0 {
+            if(missileCount > 0) {
+                ObjectManager.sharedInstance.addObject(object: Missile(owner: name!, position: position, heading: heading))
+                //missileCount -= 1
+            }
+            else {
+                fullyReloadMissiles()
+            }
+            
+            // Reset the cooldown
+            missileReloadCooldown = Config.FighterShipReloadCooldown
         }
     }
     
@@ -85,7 +106,7 @@ class FighterShip: MovingObject {
             // Ignore this missile it belongs to this ship
             if(missile.missileOwner != name) {
                 // If this is someone else's missile, destroy this ship
-                isActive = false
+                destroy()
             }
         }
         // Check if ran into another fighter ship
@@ -93,7 +114,18 @@ class FighterShip: MovingObject {
             // Ignore if this ship is on our team
             if(fighterShip.team != team) {
                 // Ran into another fighter ship, destroy this ship
-                isActive = false
+                destroy()
+            }
+        }
+    }
+    
+    // Spot something
+    override func seeObject(_ object: BaseObject?) {
+        if let spottedFighterShip = object as? FighterShip {
+            if target == nil || !stateMachine!.isInState(inState: FighterShipAttackState.sharedInstance) {
+                // Make the spotted fighter ship the target
+                target = spottedFighterShip
+                stateMachine?.changeState(newState: FighterShipAttackState.sharedInstance)
             }
         }
     }
@@ -105,6 +137,11 @@ class FighterShip: MovingObject {
             return false
         }
         
+        // Update the reload cooldown if necessary
+        if missileReloadCooldown > 0 {
+            missileReloadCooldown -= CGFloat(dTime)
+        }
+        
         // Update the fighter ship with the current state
         stateMachine?.update(dTime: dTime)
         
@@ -112,10 +149,6 @@ class FighterShip: MovingObject {
     }
     
     override func inputTouchDown(touchPos: CGPoint) {
-//        // Setup the steering behavior and then change the state to seek
-//        self.steeringBehavior!.setToSeek(target: Vector(point: touchPos))
-//        stateMachine?.changeState(newState: FighterShipMoveState.sharedInstance)
-        
         fireMissile()
     }
     

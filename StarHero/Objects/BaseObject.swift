@@ -11,16 +11,7 @@ import SpriteKit
 
 class BaseObject {
     // State of the object
-    var isActive: Bool = false {
-        didSet {
-            // If this object is turned to inactive, it should be destroyed
-            if !isActive {
-                // Should call the destroy class of the object sub class to remove the node from the scene
-                destroy()
-                print("Destroying: \(self.name!)")
-            }
-        }
-    }
+    var isActive: Bool = false
     
     // Unique name of this object, also used for the node
     var name: String? = nil
@@ -63,7 +54,7 @@ class BaseObject {
     func getUniqueName() -> String {
         // Increment the unique identifier and return it
         BaseObject.uniqueIdentifier = BaseObject.uniqueIdentifier + 1
-        return "\(String(describing: self))\(BaseObject.uniqueIdentifier)"
+        return "\(String(describing: type(of: self)))\(BaseObject.uniqueIdentifier)"
     }
     
     // Setup this fighter ship's sprite node and return it to the scene to be added
@@ -80,7 +71,11 @@ class BaseObject {
     
     // Destroy this fighter ship
     func destroy() {
-        self.getNode()?.removeFromParent()
+        if isActive {
+            isActive = false
+            self.getNode()?.removeFromParent()
+            //print("Destroying: \(self.name!)")
+        }
     }
     
     ///////
@@ -89,6 +84,7 @@ class BaseObject {
     func getNode() -> SKNode? { return nil }
     func update(dTime: TimeInterval) -> Bool { return false }   // Update the object
     func handleCollision(_ object: BaseObject?) { }             // Handle a collision with the passed through object
+    func seeObject(_ object: BaseObject?) { }                   // Handle collision of vision box with an object
     func inputTouchDown(touchPos: CGPoint) { }                  // Handle the different inputs from the game screen
     func inputTouchUp(touchPos: CGPoint) { }                    // Handle the different inputs from the game screen
     func inputTouchMoved(touchPos: CGPoint) { }                 // Handle the different inputs from the game screen

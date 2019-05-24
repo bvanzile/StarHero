@@ -28,10 +28,10 @@ class ObjectManager {
     // Initializer
     private init() {
         // Setting up 2 ships for testing
-        let ship1 = FighterShip(position: Vector(x: -200, y: 200), heading: Vector(degrees: 90.0), team: Config.Team.RedTeam)
-        let ship2 = FighterShip(position: Vector(x: 200, y: 200), heading: Vector(degrees: 90.0), team: Config.Team.BlueTeam)
-        let ship3 = FighterShip(position: Vector(x: -200, y: -200), heading: Vector(degrees: 270.0), team: Config.Team.OrangeTeam)
-        let ship4 = FighterShip(position: Vector(x: 200, y: -200), heading: Vector(degrees: 270.0), team: Config.Team.GreenTeam)
+        let ship1 = FighterShip(position: Vector(x: -Config.FieldWidth / 2.2, y: Config.FieldHeight / 2.3), heading: Vector(degrees: 315.0), team: Config.Team.RedTeam)
+        let ship2 = FighterShip(position: Vector(x: Config.FieldWidth / 2.2, y: Config.FieldHeight / 2.3), heading: Vector(degrees: 225.0), team: Config.Team.BlueTeam)
+        let ship3 = FighterShip(position: Vector(x: -Config.FieldWidth / 2.2, y: -Config.FieldHeight / 2.3), heading: Vector(degrees: 45.0), team: Config.Team.OrangeTeam)
+        let ship4 = FighterShip(position: Vector(x: Config.FieldWidth / 2.2, y: -Config.FieldHeight / 2.3), heading: Vector(degrees: 135.0), team: Config.Team.GreenTeam)
         
         objects[ship1.name!] = ship1
         objects[ship2.name!] = ship2
@@ -82,7 +82,7 @@ class ObjectManager {
     func removeObject(inName: String) {
         if let object = objects[inName] {
             // Triggers the delete method
-            object.isActive = false
+            object.destroy()
             
             // Remove from the list of active game objects
             objects.removeValue(forKey: inName)
@@ -147,12 +147,49 @@ class ObjectManager {
             return
         }
         
+        // Check relationship - child/parents shouldn't be interacting in any kind of way
+        if contact.bodyA.node?.parent == contact.bodyB.node || contact.bodyA.node == contact.bodyB.node?.parent {
+            return
+        }
+        
         // Unwrap both node names and make sure they exist
         if let firstNodeName = contact.bodyA.node?.name, let secondNodeName = contact.bodyB.node?.name {
-            // Have each of the nodes handle the collission
-            objects[firstNodeName]?.handleCollision(objects[secondNodeName])
-            objects[secondNodeName]?.handleCollision(objects[firstNodeName])
-            print("\(firstNodeName) has contacted with \(secondNodeName)")
+            // Check if an object was seen or if objects collided
+            if firstNodeName.contains(".Sight") {
+                // Capture the name of the object that has sight of something
+                let nameWhoSaw = firstNodeName.components(separatedBy: ".")[0]
+                
+                // Ignore that the object was seen since it was created by them
+                if nameWhoSaw == secondNodeName.components(separatedBy: ".")[0] {
+                    return
+                }
+                
+                print("\(nameWhoSaw) sees \(secondNodeName)")
+                objects[nameWhoSaw]?.seeObject(objects[secondNodeName])
+            }
+            else if secondNodeName.contains(".Sight") {
+                // Capture the name of the object that has sight of something
+                let nameWhoSaw = secondNodeName.components(separatedBy: ".")[0]
+                
+                // Ignore that the object was seen since it was created by them
+                if nameWhoSaw == firstNodeName.components(separatedBy: ".")[0] {
+                    return
+                }
+                
+                print("\(nameWhoSaw) sees \(firstNodeName)")
+                objects[nameWhoSaw]?.seeObject(objects[firstNodeName])
+            }
+            else {
+                // Don't let things collide if they belong to the same object
+                if firstNodeName.components(separatedBy: ".")[0] == secondNodeName.components(separatedBy: ".")[0] {
+                    return
+                }
+                
+                // Handle the collision between two physical objects
+                objects[firstNodeName]?.handleCollision(objects[secondNodeName])
+                objects[secondNodeName]?.handleCollision(objects[firstNodeName])
+                print("\(firstNodeName) has collided with \(secondNodeName)")
+            }
         }
     }
     
