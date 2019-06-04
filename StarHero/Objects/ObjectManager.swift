@@ -23,20 +23,27 @@ class ObjectManager {
     private var objects: [String: BaseObject] = [String: BaseObject]()
     
     // A queue to manage contact physics from the game scene
-    private var contactQueue = [SKPhysicsContact]()
+    private var newContactQueue = [SKPhysicsContact]()
+    private var endedContactQueue = [SKPhysicsContact]()
     
     // Initializer
     private init() {
         // Setting up 2 ships for testing
-        let ship1 = FighterShip(position: Vector(x: -Config.FieldWidth / 2.2, y: Config.FieldHeight / 2.3), heading: Vector(degrees: 315.0), team: Config.Team.RedTeam)
-        let ship2 = FighterShip(position: Vector(x: Config.FieldWidth / 2.2, y: Config.FieldHeight / 2.3), heading: Vector(degrees: 225.0), team: Config.Team.BlueTeam)
-        let ship3 = FighterShip(position: Vector(x: -Config.FieldWidth / 2.2, y: -Config.FieldHeight / 2.3), heading: Vector(degrees: 45.0), team: Config.Team.OrangeTeam)
-        let ship4 = FighterShip(position: Vector(x: Config.FieldWidth / 2.2, y: -Config.FieldHeight / 2.3), heading: Vector(degrees: 135.0), team: Config.Team.GreenTeam)
+        //let ship1 = FighterShip(position: Vector(x: -Config.FieldWidth / 2.2, y: Config.FieldHeight / 2.3), heading: Vector(degrees: 315.0), team: Config.Team.RedTeam)
+        //let ship2 = FighterShip(position: Vector(x: Config.FieldWidth / 2.2, y: Config.FieldHeight / 2.3), heading: Vector(degrees: 225.0), team: Config.Team.BlueTeam)
+        //let ship3 = FighterShip(position: Vector(x: -Config.FieldWidth / 2.2, y: -Config.FieldHeight / 2.3), heading: Vector(degrees: 45.0), team: Config.Team.OrangeTeam)
+        //let ship4 = FighterShip(position: Vector(x: Config.FieldWidth / 2.2, y: -Config.FieldHeight / 2.3), heading: Vector(degrees: 135.0), team: Config.Team.GreenTeam)
         
-        objects[ship1.name!] = ship1
-        objects[ship2.name!] = ship2
-        objects[ship3.name!] = ship3
-        objects[ship4.name!] = ship4
+        //objects[ship1.name!] = ship1
+        //objects[ship2.name!] = ship2
+        //objects[ship3.name!] = ship3
+        //objects[ship4.name!] = ship4
+        
+        let redShip = FighterShip(position: Vector(x: 0, y: -Config.FieldHeight * 3 / 8), heading: Vector(degrees: CGFloat.random(in: 45...135)), team: Config.Team.RedTeam)
+        let blueShip = FighterShip(position: Vector(x: 0, y: Config.FieldHeight * 3 / 8), heading: Vector(degrees: CGFloat.random(in: 225...315)), team: Config.Team.BlueTeam)
+        
+        objects[redShip.name!] = redShip
+        objects[blueShip.name!] = blueShip
     }
     
     // Setup the scene with objects
@@ -109,8 +116,12 @@ class ObjectManager {
                 for name in touchedNodes {
                     // Take action if the pause button was pressed
                     if(name == "pauseButton") {
-                        let ship = FighterShip(position: Vector(x: CGFloat.random(in: -Config.FieldWidth/2...Config.FieldWidth/2), y: CGFloat.random(in: -Config.FieldHeight/2...Config.FieldHeight/2)), heading: Vector(degrees: CGFloat.random(in: 0...360)), team: Config.Team.RandomTeam)
-                        addObject(object: ship)
+                        //let ship = FighterShip(position: Vector(x: CGFloat.random(in: -Config.FieldWidth/2...Config.FieldWidth/2), y: CGFloat.random(in: -Config.FieldHeight/2...Config.FieldHeight/2)), heading: Vector(degrees: CGFloat.random(in: 0...360)), team: Config.Team.RandomTeam)
+                        let redShip = FighterShip(position: Vector(x: 0, y: -Config.FieldHeight * 3 / 8), heading: Vector(degrees: CGFloat.random(in: 45...135)), team: Config.Team.RedTeam)
+                        let blueShip = FighterShip(position: Vector(x: 0, y: Config.FieldHeight * 3 / 8), heading: Vector(degrees: CGFloat.random(in: 225...315)), team: Config.Team.BlueTeam)
+                        
+                        addObject(object: redShip)
+                        addObject(object: blueShip)
                     }
                     else {
                         objects[name]?.inputTouchDown(touchPos: pos)
@@ -118,11 +129,15 @@ class ObjectManager {
                 }
             }
             else {
-                // Update all of the game nodes with the input, temporary so they all try to fire a missile
-                for (_, object) in objects {
-                    object.inputTouchDown(touchPos: pos)
-                }
+                let userMissile = Missile(owner: "User", position: Vector(x: 0, y: 0), heading: Vector(point: pos))
+                addObject(object: userMissile)
             }
+//            else {
+//                // Update all of the game nodes with the input, temporary so they all try to fire a missile
+//                for (_, object) in objects {
+//                    object.inputTouchDown(touchPos: pos)
+//                }
+//            }
             break
             
         // Touch was stopped at pos
@@ -141,7 +156,7 @@ class ObjectManager {
     }
     
     // Process all of the contacts in the queue and perform the necessary interactions
-    func handleContacts(contact: SKPhysicsContact) {
+    func handleNewContacts(contact: SKPhysicsContact) {
         // Check if this contact has already been handled or if both nodes still exist
         if contact.bodyA.node?.parent == nil || contact.bodyB.node?.parent == nil {
             return
@@ -164,7 +179,7 @@ class ObjectManager {
                     return
                 }
                 
-                print("\(nameWhoSaw) sees \(secondNodeName)")
+                //print("\(nameWhoSaw) sees \(secondNodeName)")
                 objects[nameWhoSaw]?.seeObject(objects[secondNodeName])
             }
             else if secondNodeName.contains(".Sight") {
@@ -176,7 +191,7 @@ class ObjectManager {
                     return
                 }
                 
-                print("\(nameWhoSaw) sees \(firstNodeName)")
+                //print("\(nameWhoSaw) sees \(firstNodeName)")
                 objects[nameWhoSaw]?.seeObject(objects[firstNodeName])
             }
             else {
@@ -188,24 +203,81 @@ class ObjectManager {
                 // Handle the collision between two physical objects
                 objects[firstNodeName]?.handleCollision(objects[secondNodeName])
                 objects[secondNodeName]?.handleCollision(objects[firstNodeName])
-                print("\(firstNodeName) has collided with \(secondNodeName)")
+                //print("\(firstNodeName) has collided with \(secondNodeName)")
+            }
+        }
+    }
+    
+    // Process all of the contacts in the queue and perform the necessary interactions
+    func handleEndedContacts(contact: SKPhysicsContact) {
+        // Check if this contact has already been handled or if both nodes still exist
+        if contact.bodyA.node?.parent == nil || contact.bodyB.node?.parent == nil {
+            return
+        }
+
+        // Check relationship - child/parents shouldn't be interacting in any kind of way
+        if contact.bodyA.node?.parent == contact.bodyB.node || contact.bodyA.node == contact.bodyB.node?.parent {
+            return
+        }
+
+        // Unwrap both node names and make sure they exist
+        if let firstNodeName = contact.bodyA.node?.name, let secondNodeName = contact.bodyB.node?.name {
+            // Check if an object was seen or if objects collided
+            if firstNodeName.contains(".Sight") {
+                // Capture the name of the object that has sight of something
+                let nameWhoSaw = firstNodeName.components(separatedBy: ".")[0]
+
+                // Ignore that the object was seen since it was created by them
+                if nameWhoSaw == secondNodeName.components(separatedBy: ".")[0] {
+                    return
+                }
+
+                //print("\(nameWhoSaw) has lost sight of \(secondNodeName)")
+                objects[nameWhoSaw]?.loseSightOnObject(objects[secondNodeName])
+            }
+            else if secondNodeName.contains(".Sight") {
+                // Capture the name of the object that has sight of something
+                let nameWhoSaw = secondNodeName.components(separatedBy: ".")[0]
+
+                // Ignore that the object was seen since it was created by them
+                if nameWhoSaw == firstNodeName.components(separatedBy: ".")[0] {
+                    return
+                }
+
+                //print("\(nameWhoSaw) has lost sight of \(firstNodeName)")
+                objects[nameWhoSaw]?.loseSightOnObject(objects[firstNodeName])
             }
         }
     }
     
     // Iterate through the contacts in the queue and handle them
     func processContacts() {
-        for contact in contactQueue {
-            handleContacts(contact: contact)
+        // Handle the new contacts
+        for contact in newContactQueue {
+            handleNewContacts(contact: contact)
             
-            if let index = contactQueue.firstIndex(of: contact) {
-                contactQueue.remove(at: index)
+            if let index = newContactQueue.firstIndex(of: contact) {
+                newContactQueue.remove(at: index)
+            }
+        }
+        
+        // Handle the contacts that have ended
+        for contact in endedContactQueue {
+            handleEndedContacts(contact: contact)
+            
+            if let index = endedContactQueue.firstIndex(of: contact) {
+                endedContactQueue.remove(at: index)
             }
         }
     }
     
     // Get a collision from the game scene to process in the update function
-    func addContactToQueue(contact: SKPhysicsContact) {
-        contactQueue.append(contact)
+    func addNewContactToQueue(contact: SKPhysicsContact) {
+        newContactQueue.append(contact)
+    }
+    
+    // Get the ended collisions from the game scene to process in the update function
+    func addEndedContactToQueue(contact: SKPhysicsContact) {
+        endedContactQueue.append(contact)
     }
 }

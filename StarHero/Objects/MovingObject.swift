@@ -48,7 +48,7 @@ class MovingObject: BaseObject, VectorMath {
         // Update the heading based on the current velocity
         if(velocity.length() > 0) {
             heading = velocity.normalize()
-            side = heading.perpendicularRight()
+            side = heading.right()
         }
         else {
             print("Zero velocity")

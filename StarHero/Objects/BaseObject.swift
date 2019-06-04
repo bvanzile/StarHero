@@ -9,7 +9,7 @@
 import Foundation
 import SpriteKit
 
-class BaseObject {
+class BaseObject: Equatable {
     // State of the object
     var isActive: Bool = false
     
@@ -39,11 +39,11 @@ class BaseObject {
         }
         
         // Capture the initial heading direction
-        side = self.heading.perpendicularRight()
+        side = self.heading.right()
 
         // Capture the team this object belongs to
         if(team == Config.Team.RandomTeam) {
-            self.team = Int.random(in: 0...4)
+            self.team = Config.Team.getRandomTeam()
         }
         else {
             self.team = team
@@ -84,8 +84,22 @@ class BaseObject {
     func getNode() -> SKNode? { return nil }
     func update(dTime: TimeInterval) -> Bool { return false }   // Update the object
     func handleCollision(_ object: BaseObject?) { }             // Handle a collision with the passed through object
-    func seeObject(_ object: BaseObject?) { }                   // Handle collision of vision box with an object
+    func seeObject(_ object: BaseObject?) { }                   // Handle collision of sight box with an object
+    func loseSightOnObject(_ object: BaseObject?) { }           // Handle losing collision on sight box with an object
     func inputTouchDown(touchPos: CGPoint) { }                  // Handle the different inputs from the game screen
     func inputTouchUp(touchPos: CGPoint) { }                    // Handle the different inputs from the game screen
     func inputTouchMoved(touchPos: CGPoint) { }                 // Handle the different inputs from the game screen
+    
+    // Compare two base objects to see if they are the same
+    static func == (lhs: BaseObject, rhs: BaseObject) -> Bool {
+        let leftName = lhs.name
+        let rightName = rhs.name
+        
+        // Make sure the names are valid
+        if leftName != nil && rightName != nil {
+            // Return whether or not these names are the same
+            return leftName == rightName
+        }
+        return false
+    }
 }

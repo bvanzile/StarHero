@@ -67,7 +67,7 @@ class Missile: MovingObject {
     // Update function, return true if update successful, return false if this object is ready to be terminated
     override func update(dTime: TimeInterval) -> Bool {
         // If superclass indicates deletion or the missile flew out of bounds, return false
-        if(!isActive || self.isOutOfBounds(scale: 1.1)) {
+        if(!isActive || self.isOutOfBounds(scale: 1.3)) {
             return false
         }
         

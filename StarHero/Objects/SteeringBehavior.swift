@@ -29,6 +29,9 @@ class SteeringBehavior {
     // Target vector
     var targetPosition: Vector = Vector()
     
+    // Just stores the heading to return to after dodging
+    var returnHeading: Vector?
+    
     // For pursuing
     var pursuedTarget: MovingObject? = nil
     
@@ -72,6 +75,10 @@ class SteeringBehavior {
     }
     func setToIdle() { activeSteeringBehavior = SteeringBehaviors.Idle }
     
+    func getActiveBehavior() -> SteeringBehaviors {
+        return activeSteeringBehavior
+    }
+    
     // Function for getting the steering force
     func calculateSteeringForce() -> Vector {        
         var desiredVelocity = Vector()
@@ -108,15 +115,15 @@ class SteeringBehavior {
         }
         
         // Need to adjust the steering force if the desired velocity is behind the object so it turns smoothly
-        if(movingObject.velocity.dotProductDegrees(vector: desiredVelocity) > 90) {
-            if(movingObject.heading.perpendicularRight().dotProductDegrees(vector: desiredVelocity) > 90)
+        if(movingObject.velocity.dotDegrees(vector: desiredVelocity) > 90) {
+            if(movingObject.heading.right().dotDegrees(vector: desiredVelocity) > 90)
             {
                 // Turn straight left
-                desiredVelocity = movingObject.heading.perpendicularLeft() * desiredVelocity.length()
+                desiredVelocity = movingObject.heading.left() * desiredVelocity.length()
             }
             else {
                 // Turn straight right
-                desiredVelocity = movingObject.heading.perpendicularRight() * desiredVelocity.length()
+                desiredVelocity = movingObject.heading.right() * desiredVelocity.length()
             }
         }
         
@@ -124,12 +131,28 @@ class SteeringBehavior {
         return (desiredVelocity - movingObject.velocity).truncate(value: movingObject.maxForce)
     }
 
-    private func seek() -> Vector {
-        return (targetPosition - movingObject.position).normalize() * movingObject.maxSpeed
-    }
-    
-    private func seek(target: Vector) -> Vector {
-        return (target - movingObject.position).normalize() * movingObject.maxSpeed
+    private func seek(target: Vector? = nil) -> Vector {
+        // Limit the desired velocity to 90 degrees right or left so we don't try to come to a stop
+        let targetPos = target ?? targetPosition
+        
+        let desiredVelocity = targetPos - movingObject.position
+
+        // Check if we are trying to turn around
+        if desiredVelocity.dot(vector: movingObject.heading) > 1.5708 {
+            // Desired velocity is behind, figure out if we need to be turning right or left and change desired to 90 degrees
+            if movingObject.heading.right().dot(vector: desiredVelocity) < 1.5708 {
+                // Turning around to the right
+                return movingObject.heading.right() * movingObject.maxSpeed
+            }
+            else {
+                // Turning around to the left
+                return movingObject.heading.left() * movingObject.maxSpeed
+            }
+        }
+        else {
+            // Target is in front
+            return (targetPos - movingObject.position).normalize() * movingObject.maxSpeed
+        }
     }
     
     private func arrive() -> Vector {
@@ -171,13 +194,13 @@ class SteeringBehavior {
             let distanceToTarget = target.position - movingObject.position
             
             // Relative heading
-            let relativeHeading = movingObject.heading.dotProductRads(vector: target.heading)
+            let relativeHeading = movingObject.heading.dot(vector: target.heading)
             
-            if distanceToTarget.dotProductRads(vector: target.heading) > 0 && relativeHeading < 0.95 {
+            if relativeHeading > 2.9 {
                 return seek(target: target.position)
             }
             
-            let lookAheadTime = distanceToTarget.length() / Config.MissileMaxSpeed //((movingObject.maxSpeed + target.velocity.length()) * 1)
+            let lookAheadTime = (distanceToTarget).length() / Config.MissileMaxSpeed //((movingObject.maxSpeed + target.velocity.length()) * 1)
             
             return seek(target: target.position + (target.velocity * lookAheadTime))
         }

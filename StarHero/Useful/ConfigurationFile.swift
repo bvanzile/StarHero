@@ -48,24 +48,25 @@ struct Config {
     
     // Sprite image locations
     static let FighterShipLocation: String = "FighterShipDetailed"
-    static let FighterShipScale: CGFloat = 0.4           // Factor to scale the fighter ship to from image size to screen size
+    static let FighterShipScale: CGFloat = 0.3           // Factor to scale the fighter ship to from image size to screen size
     
     // Fighter ship physics configurations
-    static let FighterShipMass: CGFloat = 15             // Weight of the ship for movement physics
-    static let FighterShipMaxSpeed: CGFloat = 100        // Units/second
+    static let FighterShipMass: CGFloat = 25             // Weight of the ship for movement physics
+    static let FighterShipMaxSpeed: CGFloat = 120        // Units/second
     static let FighterShipTakeoffSpeed: CGFloat = 5      // Units/second
-    static let FighterShipMaxForce: CGFloat = 50         // For acceleration/turn rate
+    static let FighterShipMaxForce: CGFloat = 75         // For acceleration/turn rate
     static let FighterShipDeceleration: CGFloat = 0.8    // Rate of deceleration for an arrival, higher is faster
-    static let FighterShipSightDistance: CGFloat = 1200.0
-    static let FighterShipSightPeripheral: CGFloat = 70.0
+    static let FighterShipSightDistance: CGFloat = 1000.0
+    static let FighterShipSightPeripheral: CGFloat = 100.0
     
     // Special fighter ship configurations
     static let FighterShipMaxMissileCount: Int = 2
-    static let FighterShipReloadCooldown: CGFloat = 1.0
+    static let FighterShipFiringLimit: CGFloat = 1.0
+    static let FighterShipReloadCooldown: CGFloat = 2.0
     
     // Missile constants
     static let MissileLocation: String = "Missile"
-    static let MissileScale: CGFloat = 0.2
+    static let MissileScale: CGFloat = 0.1
     
     // Missile physics
     static let MissileMass: CGFloat = 1
@@ -82,6 +83,10 @@ struct Config {
         static let OrangeTeam: Int = 3
         static let NoTeam: Int = 4
         static let RandomTeam: Int = 5
+        
+        static func getRandomTeam() -> Int {
+            return Int.random(in: 0...4)
+        }
     }
     
     // Colors used

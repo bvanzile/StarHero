@@ -79,14 +79,14 @@ struct Vector: VectorMath {
         return Vector(x: left.x - right.x, y: left.y - right.y)
     }
     
-    func dotProductRads(vector: Vector) -> CGFloat {
+    func dot(vector: Vector) -> CGFloat {
         let thisVectorNormalized = self.normalize()
         let otherVectorNormalized = vector.normalize()
         
         return acos((thisVectorNormalized.x * otherVectorNormalized.x) + (thisVectorNormalized.y * otherVectorNormalized.y))
     }
     
-    func dotProductDegrees(vector: Vector) -> CGFloat {
+    func dotDegrees(vector: Vector) -> CGFloat {
         let thisVectorNormalized = self.normalize()
         let otherVectorNormalized = vector.normalize()
         
@@ -94,12 +94,12 @@ struct Vector: VectorMath {
     }
     
     // Return the vector that is perpindicular and to the right (clockwise)
-    func perpendicularRight() -> Vector {
+    func right() -> Vector {
         return Vector(x: y, y: -x)
     }
     
     // Return the vector that is perpindicular and to the right (clockwise)
-    func perpendicularLeft() -> Vector {
+    func left() -> Vector {
         return Vector(x: -y, y: x)
     }
     

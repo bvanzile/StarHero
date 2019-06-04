@@ -96,12 +96,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     // Some contact was detected between two game physics objects
     func didBegin(_ contact: SKPhysicsContact) {
-        ObjectManager.sharedInstance.addContactToQueue(contact: contact)
+        ObjectManager.sharedInstance.addNewContactToQueue(contact: contact)
     }
     
     // Some contact between two game physics objects has now ended
     func didEnd(_ contact: SKPhysicsContact) {
-        //print("Some contact ended")
+        ObjectManager.sharedInstance.addEndedContactToQueue(contact: contact)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

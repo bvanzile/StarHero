@@ -26,6 +26,7 @@ class FighterShipReturnToFieldState: State {
     // Function for exiting a state
     func exit(object: BaseObject) {
         if let _ = object as? FighterShip {
+            //print("\(fighterShip.name!) has returned to the field")
         }
     }
     

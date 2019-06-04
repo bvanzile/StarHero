@@ -19,6 +19,12 @@ class FighterShipWanderState: State {
     func enter(object: BaseObject) {
         if let fighterShip = object as? FighterShip {
             //print("\(fighterShip.name!) entering wander state")
+            
+            // If the ship still sees something, attack it
+            if fighterShip.seesEnemyFighterShip() {
+                fighterShip.stateMachine?.changeState(newState: FighterShipAttackState.sharedInstance)
+            }
+            
             fighterShip.steeringBehavior?.setToWander()
         }
     }
@@ -26,6 +32,7 @@ class FighterShipWanderState: State {
     // Function for exiting a state
     func exit(object: BaseObject) {
         if let _ = object as? FighterShip {
+            //print("\(fighterShip.name!) exiting wander state")
         }
     }
     

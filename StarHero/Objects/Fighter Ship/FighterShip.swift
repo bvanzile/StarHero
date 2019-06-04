@@ -19,12 +19,18 @@ class FighterShip: MovingObject, ObjectCanSee {
     // The fighter ship state machine
     var stateMachine: StateMachine?
     
-    // Reference to another object that the fighter ship can pursue and attack
-    var target: MovingObject? = nil
+    // Reference to all of the objects the ship can currently see
+    var objectsInSight: [String: MovingObject] = [String: MovingObject]()
+    
+    // The last known direction that a threat was known, useful after dodging
+    var lastThreatHeading: Vector? = nil
     
     // Count of how many missiles this fighter ship has currently
     var missileCount: Int = Config.FighterShipMaxMissileCount
     var missileReloadCooldown: CGFloat = 0.0
+    var missileLaunchSide: Int = Int.random(in: 0...1)
+    
+    var debugText: SKLabelNode = SKLabelNode(text: "test")
     
     // Initialize the fighter ship
     override init(position: Vector? = nil, heading: Vector? = nil, team: Int = Config.Team.NoTeam) {
@@ -70,6 +76,12 @@ class FighterShip: MovingObject, ObjectCanSee {
         // Add the sight node to the fighter ship
         fighterShipNode.addChild(sightNode)
         
+        debugText.fontSize = 80
+        debugText.position = CGPoint(x: 0, y: -150)
+        debugText.fontColor = SKColor.yellow
+        debugText.text = "0"
+        fighterShipNode.addChild(debugText)
+        
         // Initialize the state machine
         stateMachine = StateMachine(object: self)
         stateMachine?.changeState(newState: FighterShipWanderState.sharedInstance)
@@ -77,26 +89,119 @@ class FighterShip: MovingObject, ObjectCanSee {
         print("Initialized \(self.name!)")
     }
     
-    // Fire a missile at the current direction we are facing
-    func fireMissile() {
-        if missileReloadCooldown <= 0 {
-            if(missileCount > 0) {
-                ObjectManager.sharedInstance.addObject(object: Missile(owner: name!, position: position, heading: heading))
-                //missileCount -= 1
-            }
-            else {
-                fullyReloadMissiles()
-            }
+    // Aim and start firing missiles
+    func attackTarget() {
+        // Make sure there is something to be attacking
+        if let enemy = steeringBehavior?.pursuedTarget {
+            // Vector to the enemy object's current position
+            let distanceToTarget = enemy.position - self.position
             
-            // Reset the cooldown
-            missileReloadCooldown = Config.FighterShipReloadCooldown
+            // Calculate how far in front of the enemy to be aiming
+            let lookAheadTime = distanceToTarget.length() / Config.MissileMaxSpeed
+            
+            // Calculate what an accurate shot would look like
+            let accurateShotVelocity = distanceToTarget + (enemy.velocity * lookAheadTime)
+            
+            // Check if our current heading is close enough to start firing
+            if self.heading.dot(vector: accurateShotVelocity) < 0.2 {
+                // Check if we can fire a missile
+                if missileReloadCooldown <= 0 {
+                    // Check if we have any rockets
+                    if(missileCount > 0) {
+                        // Offset the rocket's position when firing
+                        let missileLaunchOffset: Vector = missileLaunchSide % 1 == 0 ? self.heading.left() * self.radius / 4 : self.heading.right() * self.radius / 4
+                        missileLaunchSide += 1
+                        
+                        let missileLaunchHeading: Vector = accurateShotVelocity.normalize()
+                        
+                        // Fire a missile at the projected velocity
+                        fireMissile(position: self.position + missileLaunchOffset, heading: missileLaunchHeading)
+                        
+                        // Handle the missile being fired
+                        missileCount -= 1
+                        
+                        if missileCount <= 0 {
+                            // Simulate a reload
+                            missileCount = Config.FighterShipMaxMissileCount
+                            missileReloadCooldown = Config.FighterShipReloadCooldown
+                        }
+                        else {
+                            // Just use the limit for how many you can fire
+                            missileReloadCooldown = Config.FighterShipFiringLimit
+                        }
+                    }
+                }
+            }
         }
     }
     
-    // Reload the fighter ship with the max amount of missiles it can carry
-    func fullyReloadMissiles() {
-        missileCount = Config.FighterShipMaxMissileCount
-        print("\(name!) reloaded!")
+    // Check if this fighter ship sees any other fighter ships
+    func seesEnemyFighterShip() -> Bool {
+        // Simply check if we see anything at all first
+        if !objectsInSight.isEmpty {
+            // Look through what is in sight
+            for (_, objInSight) in self.objectsInSight {
+                // Try to cast to fighter ship
+                if let _ = objInSight as? FighterShip {
+                    // Found at least one, so just return true
+                    return true
+                }
+            }
+        }
+        
+        return false
+    }
+    
+    // Get the closest fighter ship that is visible
+    func getClosestEnemyFighterShip(to: Vector? = nil) -> FighterShip? {
+        // Unwrap the position we are checking for closeness to, default is this ship's position
+        let location = to ?? self.position
+        
+        // The closest moving object
+        var closest: FighterShip?
+        
+        // Look through what this object can see and grab the closest
+        for (_, objInSight) in self.objectsInSight {
+            // Try to cast to fighter ship
+            if let fighterShipInSight = objInSight as? FighterShip {
+                // Check if this is the closest and make it the new return value if so
+                if fighterShipInSight.isActive {
+                    if closest == nil {
+                        closest = fighterShipInSight
+                    }
+                    else {
+                        if((closest!.position - location).length() > (fighterShipInSight.position - location).length()) {
+                            closest = fighterShipInSight
+                        }
+                    }
+                }
+            }
+        }
+        
+        return closest
+    }
+    
+    // Fire a missile at the current direction we are facing
+    func fireMissile(position: Vector? = nil, heading: Vector? = nil) {
+        var pos: Vector, head: Vector
+        
+        // Unwrap the input or set the default
+        if position != nil {
+            pos = position!
+        }
+        else {
+            pos = self.position
+        }
+        
+        // Unwrap the input or set the default
+        if heading != nil {
+            head = heading!
+        }
+        else {
+            head = self.heading
+        }
+        
+        ObjectManager.sharedInstance.addObject(object: Missile(owner: name!, position: pos, heading: head))
     }
     
     // Handle a collision with an object
@@ -122,10 +227,63 @@ class FighterShip: MovingObject, ObjectCanSee {
     // Spot something
     override func seeObject(_ object: BaseObject?) {
         if let spottedFighterShip = object as? FighterShip {
-            if target == nil || !stateMachine!.isInState(inState: FighterShipAttackState.sharedInstance) {
-                // Make the spotted fighter ship the target
-                target = spottedFighterShip
-                stateMachine?.changeState(newState: FighterShipAttackState.sharedInstance)
+            // Ignore the ship if they are on our team
+            if spottedFighterShip.team != team {
+                // Add the new spotted ship to the list
+                if let name = spottedFighterShip.name {
+                    objectsInSight[name] = spottedFighterShip
+                    
+                    // Ignore if we are already attacking or dodging
+                    if !stateMachine!.isInState(inState: FighterShipAttackState.sharedInstance) && !stateMachine!.isInState(inState: FighterShipDodgeState.sharedInstance) {
+                        // Make the spotted fighter ship the target
+                        stateMachine?.changeState(newState: FighterShipAttackState.sharedInstance)
+                    }
+                }
+            }
+        }
+        else if let spottedMissile = object as? Missile {
+            // Vector for this ship's position and the spotted missile
+            let missileDistance = self.position - spottedMissile.position
+            
+            // Calculate how far in front of the ship that the missile is aiming
+            let lookAheadTime = missileDistance.length() / Config.MissileMaxSpeed
+            
+            // Calculate what the velocity of an accurate shot at this ship would look like
+            let accurateShotVelocity = missileDistance + (self.velocity * lookAheadTime)
+            
+            // Check if the missile is close to aiming at this ship
+            if spottedMissile.heading.dot(vector: accurateShotVelocity) < 0.2 {
+                let dodgeVector = ((spottedMissile.heading * spottedMissile.maxSpeed) + self.velocity).normalize()
+                
+                if dodgeVector.dot(vector: self.velocity.right()) > 1.5708 {
+                    // Go straight right
+                    steeringBehavior?.setToGo(direction: self.heading.right())
+                    stateMachine?.changeState(newState: FighterShipDodgeState.sharedInstance)
+                }
+                else {
+                    // Go straight left
+                    steeringBehavior?.setToGo(direction: self.heading.left())
+                    stateMachine?.changeState(newState: FighterShipDodgeState.sharedInstance)
+                }
+            }
+            else {
+                // If we're just wandering, try to locate the shooter
+                if stateMachine!.isInState(inState: FighterShipWanderState.sharedInstance) {
+                    // Head toward where the missile is coming from
+                    let difference = spottedMissile.position - position
+                    steeringBehavior?.setToGo(direction: difference + (spottedMissile.heading.reverse() * (difference.length() * 2)))
+                    stateMachine?.changeState(newState: FighterShipTurnToLookState.sharedInstance)
+                }
+            }
+        }
+    }
+    
+    // Target moves out of sight
+    override func loseSightOnObject(_ object: BaseObject?) {
+        // Unwrap the spotted object
+        if let spottedObject = object as? MovingObject {
+            if let name = spottedObject.name {
+                objectsInSight.removeValue(forKey: name)
             }
         }
     }
@@ -141,6 +299,15 @@ class FighterShip: MovingObject, ObjectCanSee {
         if missileReloadCooldown > 0 {
             missileReloadCooldown -= CGFloat(dTime)
         }
+        
+        // Clean up the seen objects
+        for (seenName, seenObject) in objectsInSight {
+            if !seenObject.isActive {
+                objectsInSight.removeValue(forKey: seenName)
+            }
+        }
+        
+        debugText.text = "\(objectsInSight.count)"
         
         // Update the fighter ship with the current state
         stateMachine?.update(dTime: dTime)

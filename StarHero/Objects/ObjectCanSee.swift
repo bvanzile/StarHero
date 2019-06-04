@@ -10,7 +10,11 @@ import Foundation
 import SpriteKit
 
 protocol ObjectCanSee {
+    // Holds the physics object
     var sightNode: SKShapeNode { get }
+    
+    // The kind of object that can be seen
+    var objectsInSight: [String: MovingObject] { get set }
 }
 
 extension ObjectCanSee {
@@ -38,5 +42,32 @@ extension ObjectCanSee {
         path.addLine(to: CGPoint(x: 0, y: 0))
         
         return path
+    }
+    
+    // Return whether any items are visible
+    func seesSomething() -> Bool {
+        return objectsInSight.isEmpty ? false : true
+    }
+    
+    // Return the closest object in sight
+    func getClosestObject(to: Vector) -> MovingObject? {
+        // The closest moving object
+        var closest: MovingObject?
+        
+        // Look through what this object can see and grab the closest
+        for (_, objInSight) in self.objectsInSight {
+            if objInSight.isActive {
+                if closest == nil {
+                    closest = objInSight
+                }
+                else {
+                    if((closest!.position - to).length() > (objInSight.position - to).length()) {
+                        closest = objInSight
+                    }
+                }
+            }
+        }
+        
+        return closest
     }
 }

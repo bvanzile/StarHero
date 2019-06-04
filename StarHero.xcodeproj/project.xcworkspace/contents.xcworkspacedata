@@ -2,9 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:/Users/bvanzile/Documents/bvz/StarHero/StarHero/Useful/MathAndConversions.swift">
-   </FileRef>
-   <FileRef
       location = "self:StarHero.xcodeproj">
    </FileRef>
 </Workspace>
