@@ -22,10 +22,12 @@ class FighterShipWanderState: State {
             
             // If the ship still sees something, attack it
             if fighterShip.seesEnemyFighterShip() {
+                print("Cancel wander, attacking")
                 fighterShip.stateMachine?.changeState(newState: FighterShipAttackState.sharedInstance)
             }
-            
-            fighterShip.steeringBehavior?.setToWander()
+            else {
+                fighterShip.steeringBehavior?.setToWander()
+            }
         }
     }
     
@@ -43,11 +45,6 @@ class FighterShipWanderState: State {
             fighterShip.updateVelocity(timeElapsed: dTime)
             fighterShip.updatePosition(timeElapsed: dTime)
             fighterShip.updateNode()
-            
-            // When we return in bounds, go back to wandering
-            if(fighterShip.isOutOfBounds()) {
-                fighterShip.stateMachine?.changeState(newState: FighterShipReturnToFieldState.sharedInstance)
-            }
         }
     }
 }

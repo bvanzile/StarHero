@@ -142,9 +142,12 @@ class FighterShip: MovingObject, ObjectCanSee {
             // Look through what is in sight
             for (_, objInSight) in self.objectsInSight {
                 // Try to cast to fighter ship
-                if let _ = objInSight as? FighterShip {
-                    // Found at least one, so just return true
-                    return true
+                if let enemy = objInSight as? FighterShip {
+                    // Make sure it's not a friendly
+                    if enemy.team != team {
+                        // Found at least one, so just return true
+                        return true
+                    }
                 }
             }
         }
@@ -164,8 +167,8 @@ class FighterShip: MovingObject, ObjectCanSee {
         for (_, objInSight) in self.objectsInSight {
             // Try to cast to fighter ship
             if let fighterShipInSight = objInSight as? FighterShip {
-                // Check if this is the closest and make it the new return value if so
-                if fighterShipInSight.isActive {
+                // Check if this is the closest/an enemy and make it the new return value if so
+                if fighterShipInSight.isActive && fighterShipInSight.team != team {
                     if closest == nil {
                         closest = fighterShipInSight
                     }
@@ -227,14 +230,15 @@ class FighterShip: MovingObject, ObjectCanSee {
     // Spot something
     override func seeObject(_ object: BaseObject?) {
         if let spottedFighterShip = object as? FighterShip {
-            // Ignore the ship if they are on our team
-            if spottedFighterShip.team != team {
-                // Add the new spotted ship to the list
-                if let name = spottedFighterShip.name {
-                    objectsInSight[name] = spottedFighterShip
+            // Add the new spotted ship to the list
+            if let name = spottedFighterShip.name {
+                objectsInSight[name] = spottedFighterShip
+                    
+                // Don't attack the ship if they are on our team
+                if spottedFighterShip.team != team {
                     
                     // Ignore if we are already attacking or dodging
-                    if !stateMachine!.isInState(inState: FighterShipAttackState.sharedInstance) && !stateMachine!.isInState(inState: FighterShipDodgeState.sharedInstance) {
+                    if !stateMachine!.isInState(FighterShipAttackState.sharedInstance, FighterShipDodgeState.sharedInstance) {
                         // Make the spotted fighter ship the target
                         stateMachine?.changeState(newState: FighterShipAttackState.sharedInstance)
                     }
@@ -268,7 +272,7 @@ class FighterShip: MovingObject, ObjectCanSee {
             }
             else {
                 // If we're just wandering, try to locate the shooter
-                if stateMachine!.isInState(inState: FighterShipWanderState.sharedInstance) {
+                if stateMachine!.isInState(FighterShipWanderState.sharedInstance) {
                     // Head toward where the missile is coming from
                     let difference = spottedMissile.position - position
                     steeringBehavior?.setToGo(direction: difference + (spottedMissile.heading.reverse() * (difference.length() * 2)))
@@ -307,6 +311,15 @@ class FighterShip: MovingObject, ObjectCanSee {
             }
         }
         
+        // Return in bounds if we find ourselves outside the boundary
+        if(isOutOfBounds() && !stateMachine!.isInState(FighterShipReturnToFieldState.sharedInstance, FighterShipDodgeState.sharedInstance)) {
+            stateMachine?.changeState(newState: FighterShipReturnToFieldState.sharedInstance)
+        }
+        else if isOutOfBounds(scale: 1.5) {
+            print("\(name!) has ran away! This is probably a bug.")
+            destroy()
+        }
+        
         debugText.text = "\(objectsInSight.count)"
         
         // Update the fighter ship with the current state
@@ -316,7 +329,7 @@ class FighterShip: MovingObject, ObjectCanSee {
     }
     
     override func inputTouchDown(touchPos: CGPoint) {
-        fireMissile()
+        destroy()
     }
     
     override func getNode() -> SKNode? {

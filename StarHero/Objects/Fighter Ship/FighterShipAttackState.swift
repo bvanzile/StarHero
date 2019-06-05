@@ -59,7 +59,7 @@ class FighterShipAttackState: State {
                     fighterShip.updateNode()
                     
                     // Jump out of the way if you get too close
-                    if (fighterShip.position - target.position).length() < fighterShip.velocity.length() * 1.3 {
+                    if (fighterShip.position - target.position).length() < fighterShip.velocity.length() * 1.1 {
                         // Check if you are facing each other and about to collide
                         let collisionAngle = fighterShip.heading.dot(vector: target.heading)
                         let collisionPosition = (target.position - fighterShip.position).dot(vector: fighterShip.heading)
@@ -74,7 +74,7 @@ class FighterShipAttackState: State {
                             fighterShip.stateMachine?.changeState(newState: FighterShipDodgeState.sharedInstance)
                         }
                         else {
-                            if fighterShip.heading.right().dot(vector: target.position - fighterShip.position) < 1.5708 {
+                            if fighterShip.heading.right().dot(vector: (target.position - fighterShip.position) + target.velocity) < 1.5708 {
                                 // Enemy is to the right so dodge to the left
                                 let dodgeDirection = fighterShip.heading.left()
                                 

@@ -41,11 +41,6 @@ class FighterShipDodgeState: State {
             fighterShip.updatePosition(timeElapsed: dTime)
             fighterShip.updateNode()
             
-            // When we return in bounds, go back to wandering
-            if(fighterShip.isOutOfBounds()) {
-                fighterShip.stateMachine?.changeState(newState: FighterShipReturnToFieldState.sharedInstance)
-            }
-            
             // Check to see if we fully turned and then turn back
             if let neededHeading = fighterShip.steeringBehavior?.targetPosition {
                 if fighterShip.heading.dot(vector: neededHeading) < 0.1 {
