@@ -9,6 +9,16 @@
 import Foundation
 import SpriteKit
 
+extension UIColor {
+    convenience init(red: Int, green: Int, blue: Int) {
+        let newRed = CGFloat(red)/255
+        let newGreen = CGFloat(green)/255
+        let newBlue = CGFloat(blue)/255
+        
+        self.init(red: newRed, green: newGreen, blue: newBlue, alpha: 1.0)
+    }
+}
+
 struct Config {
     // Call for updating the width and height of the game scene
     static func updateFieldDimenstions(fieldWidth: CGFloat, fieldHieght: CGFloat) {
@@ -75,6 +85,18 @@ struct Config {
     static let MissileMaxForce: CGFloat = 100
     static let MissileDeceleration: CGFloat = 0.1
     
+    // Explosion constants
+    static let InitialExplosions: Double = 10.0
+    static let ExplosionsPerSecond: Double = 20.0
+    static let ExplosionScale: CGFloat = 0.35
+    
+    // Explosion colors
+    static let ExplosionColors: [UIColor] = [
+        UIColor(red: 221, green: 34, blue: 34),     // red
+        UIColor(red: 250, green: 162, blue: 28),    // orange
+        UIColor(red: 255, green: 250, blue: 35),    // yellow
+        UIColor(red: 66, green: 66, blue: 66) ]     // gray
+    
     // Team names
     struct Team {
         static let RedTeam: Int = 0
@@ -91,11 +113,11 @@ struct Config {
     
     // Colors used
     static let ColorRed: UIColor = UIColor(displayP3Red: 221.0/255.0, green: 34.0/255.0, blue: 34.0/255.0, alpha: 1.0)
-    static let ColorBlue:UIColor = UIColor(displayP3Red: 36.0/255.0, green: 149.0/255.0, blue: 214.0/255.0, alpha: 1.0)
-    static let ColorGreen:UIColor = UIColor(displayP3Red: 135.0/255.0, green: 188.0/255.0, blue: 64.0/255.0, alpha: 1.0)
-    static let ColorTeal:UIColor = UIColor(displayP3Red: 50.0/255.0, green: 188.0/255.0, blue: 173.0/255.0, alpha: 1.0)
-    static let ColorOrange:UIColor = UIColor(displayP3Red: 250.0/255.0, green: 162.0/255.0, blue: 28.0/255.0, alpha: 1.0)
-    static let ColorDarkBlue:UIColor = UIColor(displayP3Red: 26.0/255.0, green: 87.0/255.0, blue: 168.0/255.0, alpha: 1.0)
+    static let ColorBlue: UIColor = UIColor(displayP3Red: 36.0/255.0, green: 149.0/255.0, blue: 214.0/255.0, alpha: 1.0)
+    static let ColorGreen: UIColor = UIColor(displayP3Red: 135.0/255.0, green: 188.0/255.0, blue: 64.0/255.0, alpha: 1.0)
+    static let ColorTeal: UIColor = UIColor(displayP3Red: 50.0/255.0, green: 188.0/255.0, blue: 173.0/255.0, alpha: 1.0)
+    static let ColorOrange: UIColor = UIColor(displayP3Red: 250.0/255.0, green: 162.0/255.0, blue: 28.0/255.0, alpha: 1.0)
+    static let ColorDarkBlue: UIColor = UIColor(displayP3Red: 26.0/255.0, green: 87.0/255.0, blue: 168.0/255.0, alpha: 1.0)
     
     // Assign color based on team input
     static func getTeamColor(team: Int) -> UIColor {

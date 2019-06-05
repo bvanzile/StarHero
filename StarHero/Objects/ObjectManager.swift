@@ -68,7 +68,7 @@ class ObjectManager {
         // Called before each frame is rendered
         for (key, object) in objects {
             if !object.update(dTime: timeDelta) {
-                // Destory the ship
+                // Remove and destroy the object if false is returned from the update function
                 self.removeObject(inName: key)
             }
         }
@@ -129,15 +129,14 @@ class ObjectManager {
                 }
             }
             else {
-                let userMissile = Missile(owner: "User", position: Vector(x: 0, y: 0), heading: Vector(point: pos))
-                addObject(object: userMissile)
+                // Fire a missile from the center of the screen to the mouse position
+                //let userMissile = Missile(owner: "User", position: Vector(x: 0, y: 0), heading: Vector(point: pos))
+                //addObject(object: userMissile)
+                
+                // Create an explosion at the mouse position
+                let newExplosion = Explosion(position: Vector(point: pos), size: 50, duration: 0.5)
+                addObject(object: newExplosion)
             }
-//            else {
-//                // Update all of the game nodes with the input, temporary so they all try to fire a missile
-//                for (_, object) in objects {
-//                    object.inputTouchDown(touchPos: pos)
-//                }
-//            }
             break
             
         // Touch was stopped at pos

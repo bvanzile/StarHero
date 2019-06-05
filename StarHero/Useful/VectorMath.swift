@@ -181,4 +181,10 @@ extension VectorMath {
     func GetDirection(firstPoint: CGPoint, secondPoint: CGPoint) -> CGFloat {
         return self.radsToDegrees(rads: atan2(secondPoint.y - firstPoint.y, secondPoint.x - firstPoint.x))
     }
+    
+    // Get a randomized vector
+    func randomVector() -> Vector {
+        let randomizedVector = Vector(x: CGFloat.random(in: -1...1), y: CGFloat.random(in: -1...1))
+        return randomizedVector.normalize()
+    }
 }

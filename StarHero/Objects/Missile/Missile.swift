@@ -83,6 +83,9 @@ class Missile: MovingObject {
     override func handleCollision(_ object: BaseObject?) {
         // Check if hit by a missile
         if let _ = object as? Missile {
+            // Create an explosion where the ship was destroyed
+            ObjectManager.sharedInstance.addObject(object: Explosion(position: self.position, size: self.radius * 2, duration: 0.3))
+            
             // If this is someone else's missile, destroy this missile, unlucky
             destroy()
         }

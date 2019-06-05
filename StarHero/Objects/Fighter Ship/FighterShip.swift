@@ -86,7 +86,7 @@ class FighterShip: MovingObject, ObjectCanSee {
         stateMachine = StateMachine(object: self)
         stateMachine?.changeState(newState: FighterShipWanderState.sharedInstance)
         
-        print("Initialized \(self.name!)")
+        print("Initialized \(self.name!) with color \(fighterShipNode.color)")
     }
     
     // Aim and start firing missiles
@@ -213,6 +213,9 @@ class FighterShip: MovingObject, ObjectCanSee {
         if let missile = object as? Missile {
             // Ignore this missile it belongs to this ship
             if(missile.missileOwner != name) {
+                // Create an explosion where the ship was destroyed
+                ObjectManager.sharedInstance.addObject(object: Explosion(position: self.position, size: self.radius * 2.3, duration: 0.7))
+                
                 // If this is someone else's missile, destroy this ship
                 destroy()
             }
@@ -221,6 +224,9 @@ class FighterShip: MovingObject, ObjectCanSee {
         else if let fighterShip = object as? FighterShip {
             // Ignore if this ship is on our team
             if(fighterShip.team != team) {
+                // Create an explosion where the ship was destroyed
+                ObjectManager.sharedInstance.addObject(object: Explosion(position: self.position, size: self.radius * 2.3, duration: 0.7))
+                
                 // Ran into another fighter ship, destroy this ship
                 destroy()
             }
@@ -315,7 +321,7 @@ class FighterShip: MovingObject, ObjectCanSee {
         if(isOutOfBounds() && !stateMachine!.isInState(FighterShipReturnToFieldState.sharedInstance, FighterShipDodgeState.sharedInstance)) {
             stateMachine?.changeState(newState: FighterShipReturnToFieldState.sharedInstance)
         }
-        else if isOutOfBounds(scale: 1.5) {
+        else if isOutOfBounds(scale: 2.0) {
             print("\(name!) has ran away! This is probably a bug.")
             destroy()
         }
