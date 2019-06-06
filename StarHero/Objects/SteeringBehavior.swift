@@ -80,7 +80,42 @@ class SteeringBehavior {
     }
     
     // Function for getting the steering force
-    func calculateSteeringForce() -> Vector {        
+    func calculateSteeringForce() -> Vector {
+        // Get the avoidance velocity, if there is any
+        var avoidanceVelocity = Vector()
+        
+        // Check if we need to be avoiding anything
+        if !movingObject.objectsToAvoid.isEmpty {
+            // Stores the closest enemy object to avoid
+            var closestObjectToAvoid: MovingObject? = nil
+            
+            // Iterate through the objects that are close to us
+            for (_, objectInRange) in movingObject.objectsToAvoid {
+                if closestObjectToAvoid == nil {
+                    closestObjectToAvoid = objectInRange
+                }
+                else if (objectInRange.position - movingObject.position).length() < (closestObjectToAvoid!.position - movingObject.position).length() {
+                    closestObjectToAvoid = objectInRange
+                }
+            }
+            
+            // Unwrap
+            if let avoidObject = closestObjectToAvoid {
+                // Get the velocity that will point us to safety
+                avoidanceVelocity = flee(target: avoidObject.position)
+                
+                // Reset the wandering circle if we are wandering since we wan't to come out of the avoidance going straight
+                if activeSteeringBehavior == .Wander {
+                    wanderCircle = movingObject.heading * wanderRadius
+                    targetPosition = wanderCircle + movingObject.position
+                }
+                
+                // Return the steering force vector
+                return (avoidanceVelocity - movingObject.velocity).truncate(value: movingObject.maxForce)
+            }
+        }
+        
+        // Get the desired velocity from the active steering behavior
         var desiredVelocity = Vector()
         
         // Get the desired velocity based on the active steering behavior
@@ -114,19 +149,6 @@ class SteeringBehavior {
             return desiredVelocity
         }
         
-        // Need to adjust the steering force if the desired velocity is behind the object so it turns smoothly
-        if(movingObject.velocity.dotDegrees(vector: desiredVelocity) > 90) {
-            if(movingObject.heading.right().dotDegrees(vector: desiredVelocity) > 90)
-            {
-                // Turn straight left
-                desiredVelocity = movingObject.heading.left() * desiredVelocity.length()
-            }
-            else {
-                // Turn straight right
-                desiredVelocity = movingObject.heading.right() * desiredVelocity.length()
-            }
-        }
-        
         // Return the steering force vector
         return (desiredVelocity - movingObject.velocity).truncate(value: movingObject.maxForce)
     }
@@ -151,7 +173,31 @@ class SteeringBehavior {
         }
         else {
             // Target is in front
-            return (targetPos - movingObject.position).normalize() * movingObject.maxSpeed
+            return desiredVelocity.normalize() * movingObject.maxSpeed
+        }
+    }
+    
+    private func flee(target: Vector? = nil) -> Vector {
+        // Limit the desired velocity to 90 degrees right or left so we don't try to come to a stop
+        let targetPos = target ?? targetPosition
+        
+        let desiredVelocity = movingObject.position - targetPos
+        
+        // Check if we are trying to turn around
+        if desiredVelocity.dot(vector: movingObject.heading) > 1.5708 {
+            // Desired velocity is behind, figure out if we need to be turning right or left and change desired to 90 degrees
+            if movingObject.heading.right().dot(vector: desiredVelocity) < 1.5708 {
+                // Turning around to the right
+                return movingObject.heading.right() * movingObject.maxSpeed
+            }
+            else {
+                // Turning around to the left
+                return movingObject.heading.left() * movingObject.maxSpeed
+            }
+        }
+        else {
+            // Target is in front
+            return desiredVelocity.normalize() * movingObject.maxSpeed
         }
     }
     

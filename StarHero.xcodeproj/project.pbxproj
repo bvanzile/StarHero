@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		465CBD6022A83C2E00CBB560 /* Explosion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CBD5F22A83C2E00CBB560 /* Explosion.swift */; };
+		465CBD6222A997FB00CBB560 /* ObjectPeripheralSight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CBD6122A997FB00CBB560 /* ObjectPeripheralSight.swift */; };
 		465CEF542283A2720082E062 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEF532283A2720082E062 /* AppDelegate.swift */; };
 		465CEF582283A2720082E062 /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = 465CEF572283A2720082E062 /* Actions.sks */; };
 		465CEF5C2283A2720082E062 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEF5B2283A2720082E062 /* GameViewController.swift */; };
@@ -60,6 +61,7 @@
 
 /* Begin PBXFileReference section */
 		465CBD5F22A83C2E00CBB560 /* Explosion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Explosion.swift; sourceTree = "<group>"; };
+		465CBD6122A997FB00CBB560 /* ObjectPeripheralSight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectPeripheralSight.swift; sourceTree = "<group>"; };
 		465CEF502283A2720082E062 /* StarHero.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StarHero.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		465CEF532283A2720082E062 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		465CEF552283A2720082E062 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
@@ -198,6 +200,7 @@
 				465CEFA42291B6770082E062 /* Fighter Ship */,
 				46EBC2BA2294870F00CBF2F6 /* SteeringBehavior.swift */,
 				46EBC2D122985DCF00CBF2F6 /* ObjectCanSee.swift */,
+				465CBD6122A997FB00CBB560 /* ObjectPeripheralSight.swift */,
 				465CEF9B228F775F0082E062 /* MovingObject.swift */,
 				465CEF87228F151A0082E062 /* BaseObject.swift */,
 				465CEFA22290A94E0082E062 /* ObjectManager.swift */,
@@ -409,6 +412,7 @@
 				46EBC2C7229625E800CBF2F6 /* FighterShipReturnToFieldState.swift in Sources */,
 				465CEF9C228F775F0082E062 /* MovingObject.swift in Sources */,
 				46EBC2CE22970D8A00CBF2F6 /* Missile.swift in Sources */,
+				465CBD6222A997FB00CBB560 /* ObjectPeripheralSight.swift in Sources */,
 				465CBD6022A83C2E00CBB560 /* Explosion.swift in Sources */,
 				465CEF542283A2720082E062 /* AppDelegate.swift in Sources */,
 				465CEF8B228F17590082E062 /* FighterShip.swift in Sources */,

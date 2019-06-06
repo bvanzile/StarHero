@@ -17,6 +17,7 @@ class FighterShipAttackState: State {
     
     // Function for entering into a state
     func enter(object: BaseObject) {
+        //print("Entering Attack")
         if let fighterShip = object as? FighterShip {
             // Check if we see anything
             //print("\(fighterShip.name!) is attacking")
@@ -58,37 +59,10 @@ class FighterShipAttackState: State {
                     fighterShip.updatePosition(timeElapsed: dTime)
                     fighterShip.updateNode()
                     
-                    // Jump out of the way if you get too close
-                    if (fighterShip.position - target.position).length() < fighterShip.velocity.length() * 1.1 {
-                        // Check if you are facing each other and about to collide
-                        let collisionAngle = fighterShip.heading.dot(vector: target.heading)
-                        let collisionPosition = (target.position - fighterShip.position).dot(vector: fighterShip.heading)
-
-                        // If the other ship is coming right for this one
-                        if collisionAngle > 2.7 && collisionPosition < 1.0 {
-                            // Always turn right as a courtesy in this situation
-                            let dodgeDirection = fighterShip.heading.right()
-                            
-                            //fighterShip.lastThreatHeading = dodgeDirection.reverse()
-                            fighterShip.steeringBehavior?.setToGo(direction: dodgeDirection)
-                            fighterShip.stateMachine?.changeState(newState: FighterShipDodgeState.sharedInstance)
-                        }
-                        else {
-                            if fighterShip.heading.right().dot(vector: (target.position - fighterShip.position) + target.velocity) < 1.5708 {
-                                // Enemy is to the right so dodge to the left
-                                let dodgeDirection = fighterShip.heading.left()
-                                
-                                fighterShip.steeringBehavior?.setToGo(direction: dodgeDirection)
-                                fighterShip.stateMachine?.changeState(newState: FighterShipDodgeState.sharedInstance)
-                            }
-                            else {
-                                // Enemy must be to the left so dodge to the right
-                                let dodgeDirection = fighterShip.heading.right()
-                                
-                                fighterShip.steeringBehavior?.setToGo(direction: dodgeDirection)
-                                fighterShip.stateMachine?.changeState(newState: FighterShipDodgeState.sharedInstance)
-                            }
-                        }
+                    // Check if the pursued ship is still in sight
+                    if !fighterShip.doesSee(target.name!) {
+                        // Lost sight, start wandering
+                        fighterShip.stateMachine?.changeState(newState: FighterShipWanderState.sharedInstance)
                     }
                 }
                 else {

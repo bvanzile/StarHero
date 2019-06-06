@@ -9,18 +9,20 @@
 import Foundation
 import SpriteKit
 
-class FighterShip: MovingObject, ObjectCanSee {
+class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
     // Sprite for fighter ships
     private let fighterShipNode = SKSpriteNode(imageNamed: Config.FighterShipLocation)
     
-    // Declare the required sight node
+    // Declare the required sight nodes
     var sightNode = SKShapeNode()
+    var peripheralNode = SKShapeNode()
     
     // The fighter ship state machine
     var stateMachine: StateMachine?
     
     // Reference to all of the objects the ship can currently see
-    var objectsInSight: [String: MovingObject] = [String: MovingObject]()
+    var objectsInSight: [String : MovingObject] = [String : MovingObject]()
+    var objectsInPeripheral: [String : MovingObject] = [String : MovingObject]()
     
     // The last known direction that a threat was known, useful after dodging
     var lastThreatHeading: Vector? = nil
@@ -76,6 +78,15 @@ class FighterShip: MovingObject, ObjectCanSee {
         // Add the sight node to the fighter ship
         fighterShipNode.addChild(sightNode)
         
+        // Create the peripheral vision node for the fighter ship
+        peripheralNode.position = CGPoint(x: 0, y: 0)
+        peripheralNode.isHidden = true
+        peripheralNode.name = self.name! + ".Peripheral"
+        setupPeripheralPhysicsBody(radius: Config.FighterShipPeripheralRadius, canSee: Config.BitMaskCategory.FighterShip)
+        
+        // Add the peripheral node to the fighter ship
+        fighterShipNode.addChild(peripheralNode)
+        
         debugText.fontSize = 80
         debugText.position = CGPoint(x: 0, y: -150)
         debugText.fontColor = SKColor.yellow
@@ -86,7 +97,7 @@ class FighterShip: MovingObject, ObjectCanSee {
         stateMachine = StateMachine(object: self)
         stateMachine?.changeState(newState: FighterShipWanderState.sharedInstance)
         
-        print("Initialized \(self.name!) with color \(fighterShipNode.color)")
+        print("Initialized \(self.name!) on team \(self.team)")
     }
     
     // Aim and start firing missiles
@@ -104,6 +115,50 @@ class FighterShip: MovingObject, ObjectCanSee {
             
             // Check if our current heading is close enough to start firing
             if self.heading.dot(vector: accurateShotVelocity) < 0.2 {
+                
+                // Now we need to check if we would hit a friendly
+                if objectsInSight.count > 1 {
+                    // There is more than just the one that we are firing at in sight, so let's look through the list
+                    for (_, object) in objectsInSight {
+                        // Check if this one is on our team
+                        if object.team == self.team {
+                            // Now check if it's closer than the enemy
+                            let distanceToObject = object.position - position
+                            
+                            if distanceToObject.length() < distanceToTarget.length() {
+                                // Let's measure if a shot might hit it
+                                let time = distanceToObject.length() + Config.MissileMaxSpeed
+                                let accurateShot = distanceToObject + (object.velocity * time)
+                                
+                                if self.heading.dot(vector: accurateShot) < 0.2 {
+                                    // Firing a missile right now would hit an ally
+                                    return
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Now check if an ally is right on top of us, and if we're behind it, move a little
+                if objectsInPeripheral.count > 0 {
+                    // Check each one to see who's there
+                    for (_, object) in objectsInPeripheral {
+                        if object.team == team && (object.position - position).length() < radius * 2 {
+                            // Determine if we are the one behind the other
+                            if heading.dot(vector: object.position - position) > 1.5708 {
+                                // We're too close, so dodge a little to the left or right to get a better angle
+                                steeringBehavior?.returnHeading = heading
+                                steeringBehavior?.setToGo(direction: (Bool.random() ? self.heading.right() : self.heading.left()) + heading)
+                                stateMachine?.changeState(newState: FighterShipDodgeState.sharedInstance)
+                            }
+                            else {
+                                // It's not safe to fire yet so wait a bit
+                                return
+                            }
+                        }
+                    }
+                }
+                
                 // Check if we can fire a missile
                 if missileReloadCooldown <= 0 {
                     // Check if we have any rockets
@@ -213,8 +268,11 @@ class FighterShip: MovingObject, ObjectCanSee {
         if let missile = object as? Missile {
             // Ignore this missile it belongs to this ship
             if(missile.missileOwner != name) {
+                // Determine the force behind the explosion
+                let force = ((velocity * mass) + (missile.velocity * missile.mass)).normalize()
+                
                 // Create an explosion where the ship was destroyed
-                ObjectManager.sharedInstance.addObject(object: Explosion(position: self.position, size: self.radius * 2.3, duration: 0.7))
+                ObjectManager.sharedInstance.addObject(object: Explosion(position: self.position, size: self.radius * 2.3, duration: 0.7, force: force * self.radius * 2.5))
                 
                 // If this is someone else's missile, destroy this ship
                 destroy()
@@ -224,8 +282,11 @@ class FighterShip: MovingObject, ObjectCanSee {
         else if let fighterShip = object as? FighterShip {
             // Ignore if this ship is on our team
             if(fighterShip.team != team) {
+                // Determine the force behind the explosion
+                let force = ((velocity * mass) + (fighterShip.velocity * fighterShip.mass)).normalize()
+                
                 // Create an explosion where the ship was destroyed
-                ObjectManager.sharedInstance.addObject(object: Explosion(position: self.position, size: self.radius * 2.3, duration: 0.7))
+                ObjectManager.sharedInstance.addObject(object: Explosion(position: self.position, size: self.radius * 2, duration: 0.9, force: force * self.radius * 3))
                 
                 // Ran into another fighter ship, destroy this ship
                 destroy()
@@ -298,6 +359,32 @@ class FighterShip: MovingObject, ObjectCanSee {
         }
     }
     
+    // A ship enters the peripheral range of this fighter ship
+    override func objectInPeripheralRange(_ object: BaseObject?) {
+        if let fighterShip = object as? FighterShip {
+            // Add the new spotted ship to the list
+            if let name = fighterShip.name {
+                objectsInPeripheral[name] = fighterShip
+                
+                // Keep track of enemies separately so we can dodge them
+                if fighterShip.team != self.team {
+                    objectsToAvoid[name] = fighterShip
+                }
+            }
+        }
+    }
+    
+    // A ship leaves this ship's peripheral range
+    override func objectOutOfPeripheralRange(_ object: BaseObject?) {
+        if let fighterShip = object as? FighterShip {
+            if let name = fighterShip.name {
+                // Just try to remove it
+                objectsInPeripheral.removeValue(forKey: name)
+                objectsToAvoid.removeValue(forKey: name)
+            }
+        }
+    }
+    
     // Update function, return true if update successful, return false if this object is ready to be terminated
     override func update(dTime: TimeInterval) -> Bool {
         // If superclass indicates deletion, return false
@@ -314,6 +401,20 @@ class FighterShip: MovingObject, ObjectCanSee {
         for (seenName, seenObject) in objectsInSight {
             if !seenObject.isActive {
                 objectsInSight.removeValue(forKey: seenName)
+            }
+        }
+        
+        // Clean up the seen objects
+        for (seenName, seenObject) in objectsInPeripheral {
+            if !seenObject.isActive {
+                objectsInPeripheral.removeValue(forKey: seenName)
+            }
+        }
+        
+        // Clean up the objects to avoid
+        for (seenName, seenObject) in objectsToAvoid {
+            if !seenObject.isActive {
+                objectsToAvoid.removeValue(forKey: seenName)
             }
         }
         

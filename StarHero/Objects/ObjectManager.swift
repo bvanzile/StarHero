@@ -169,29 +169,49 @@ class ObjectManager {
         // Unwrap both node names and make sure they exist
         if let firstNodeName = contact.bodyA.node?.name, let secondNodeName = contact.bodyB.node?.name {
             // Check if an object was seen or if objects collided
-            if firstNodeName.contains(".Sight") {
+            if firstNodeName.contains(".Sight") || secondNodeName.contains(".Sight") {
+                var nameWhoSaw: String, otherName: String
+                
                 // Capture the name of the object that has sight of something
-                let nameWhoSaw = firstNodeName.components(separatedBy: ".")[0]
+                if firstNodeName.contains(".Sight") {
+                    nameWhoSaw = firstNodeName.components(separatedBy: ".")[0]
+                    otherName = secondNodeName
+                }
+                else {
+                    nameWhoSaw = secondNodeName.components(separatedBy: ".")[0]
+                    otherName = firstNodeName
+                }
+                
                 
                 // Ignore that the object was seen since it was created by them
-                if nameWhoSaw == secondNodeName.components(separatedBy: ".")[0] {
+                if nameWhoSaw == otherName.components(separatedBy: ".")[0] {
                     return
                 }
                 
                 //print("\(nameWhoSaw) sees \(secondNodeName)")
-                objects[nameWhoSaw]?.seeObject(objects[secondNodeName])
+                objects[nameWhoSaw]?.seeObject(objects[otherName])
             }
-            else if secondNodeName.contains(".Sight") {
+            else if firstNodeName.contains(".Peripheral") || secondNodeName.contains(".Peripheral") {
+                var nameWhoSaw: String, otherName: String
+                
                 // Capture the name of the object that has sight of something
-                let nameWhoSaw = secondNodeName.components(separatedBy: ".")[0]
+                if firstNodeName.contains(".Peripheral") {
+                    nameWhoSaw = firstNodeName.components(separatedBy: ".")[0]
+                    otherName = secondNodeName
+                }
+                else {
+                    nameWhoSaw = secondNodeName.components(separatedBy: ".")[0]
+                    otherName = firstNodeName
+                }
+                
                 
                 // Ignore that the object was seen since it was created by them
-                if nameWhoSaw == firstNodeName.components(separatedBy: ".")[0] {
+                if nameWhoSaw == otherName.components(separatedBy: ".")[0] {
                     return
                 }
                 
-                //print("\(nameWhoSaw) sees \(firstNodeName)")
-                objects[nameWhoSaw]?.seeObject(objects[firstNodeName])
+                //print("\(nameWhoSaw) is close to \(otherName)")
+                objects[nameWhoSaw]?.objectInPeripheralRange(objects[otherName])
             }
             else {
                 // Don't let things collide if they belong to the same object
@@ -222,29 +242,49 @@ class ObjectManager {
         // Unwrap both node names and make sure they exist
         if let firstNodeName = contact.bodyA.node?.name, let secondNodeName = contact.bodyB.node?.name {
             // Check if an object was seen or if objects collided
-            if firstNodeName.contains(".Sight") {
+            if firstNodeName.contains(".Sight") || secondNodeName.contains(".Sight") {
+                var nameWhoSaw: String, otherName: String
+                
                 // Capture the name of the object that has sight of something
-                let nameWhoSaw = firstNodeName.components(separatedBy: ".")[0]
-
+                if firstNodeName.contains(".Sight") {
+                    nameWhoSaw = firstNodeName.components(separatedBy: ".")[0]
+                    otherName = secondNodeName
+                }
+                else {
+                    nameWhoSaw = secondNodeName.components(separatedBy: ".")[0]
+                    otherName = firstNodeName
+                }
+                
+                
                 // Ignore that the object was seen since it was created by them
-                if nameWhoSaw == secondNodeName.components(separatedBy: ".")[0] {
+                if nameWhoSaw == otherName.components(separatedBy: ".")[0] {
                     return
                 }
 
                 //print("\(nameWhoSaw) has lost sight of \(secondNodeName)")
-                objects[nameWhoSaw]?.loseSightOnObject(objects[secondNodeName])
+                objects[nameWhoSaw]?.loseSightOnObject(objects[otherName])
             }
-            else if secondNodeName.contains(".Sight") {
+            else if firstNodeName.contains(".Peripheral") || secondNodeName.contains(".Peripheral") {
+                var nameWhoSaw: String, otherName: String
+                
                 // Capture the name of the object that has sight of something
-                let nameWhoSaw = secondNodeName.components(separatedBy: ".")[0]
-
+                if firstNodeName.contains(".Peripheral") {
+                    nameWhoSaw = firstNodeName.components(separatedBy: ".")[0]
+                    otherName = secondNodeName
+                }
+                else {
+                    nameWhoSaw = secondNodeName.components(separatedBy: ".")[0]
+                    otherName = firstNodeName
+                }
+                
+                
                 // Ignore that the object was seen since it was created by them
-                if nameWhoSaw == firstNodeName.components(separatedBy: ".")[0] {
+                if nameWhoSaw == otherName.components(separatedBy: ".")[0] {
                     return
                 }
-
-                //print("\(nameWhoSaw) has lost sight of \(firstNodeName)")
-                objects[nameWhoSaw]?.loseSightOnObject(objects[firstNodeName])
+                
+                //print("\(nameWhoSaw) moved away from \(otherName)")
+                objects[nameWhoSaw]?.objectOutOfPeripheralRange(objects[otherName])
             }
         }
     }

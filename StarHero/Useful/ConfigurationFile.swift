@@ -49,7 +49,8 @@ struct Config {
         static let MotherShip: UInt32 = 0x1 << 2
         static let Drone: UInt32 = 0x1 << 3
         static let Sight: UInt32 = 0x1 << 4
-        static let Missile: UInt32 = 0x1 << 5
+        static let Peripheral: UInt32 = 0x1 << 5
+        static let Missile: UInt32 = 0x1 << 6
         static let All: UInt32 = UInt32.max
     }
     
@@ -66,8 +67,9 @@ struct Config {
     static let FighterShipTakeoffSpeed: CGFloat = 5      // Units/second
     static let FighterShipMaxForce: CGFloat = 75         // For acceleration/turn rate
     static let FighterShipDeceleration: CGFloat = 0.8    // Rate of deceleration for an arrival, higher is faster
-    static let FighterShipSightDistance: CGFloat = 1000.0
+    static let FighterShipSightDistance: CGFloat = 1100.0
     static let FighterShipSightPeripheral: CGFloat = 100.0
+    static let FighterShipPeripheralRadius: CGFloat = 200.0
     
     // Special fighter ship configurations
     static let FighterShipMaxMissileCount: Int = 2
@@ -79,15 +81,15 @@ struct Config {
     static let MissileScale: CGFloat = 0.1
     
     // Missile physics
-    static let MissileMass: CGFloat = 1
+    static let MissileMass: CGFloat = 3
     static let MissileMaxSpeed: CGFloat = 500
     static let MissileTakeoffSpeed: CGFloat = 0.0
     static let MissileMaxForce: CGFloat = 100
     static let MissileDeceleration: CGFloat = 0.1
     
     // Explosion constants
-    static let InitialExplosions: Double = 10.0
-    static let ExplosionsPerSecond: Double = 20.0
+    static let InitialExplosions: Int = 10
+    static let ExplosionsPerSecond: Double = 25.0
     static let ExplosionScale: CGFloat = 0.35
     
     // Explosion colors
@@ -95,7 +97,7 @@ struct Config {
         UIColor(red: 221, green: 34, blue: 34),     // red
         UIColor(red: 250, green: 162, blue: 28),    // orange
         UIColor(red: 255, green: 250, blue: 35),    // yellow
-        UIColor(red: 66, green: 66, blue: 66) ]     // gray
+        UIColor(red: 88, green: 88, blue: 88) ]     // gray
     
     // Team names
     struct Team {
@@ -112,12 +114,12 @@ struct Config {
     }
     
     // Colors used
-    static let ColorRed: UIColor = UIColor(displayP3Red: 221.0/255.0, green: 34.0/255.0, blue: 34.0/255.0, alpha: 1.0)
-    static let ColorBlue: UIColor = UIColor(displayP3Red: 36.0/255.0, green: 149.0/255.0, blue: 214.0/255.0, alpha: 1.0)
-    static let ColorGreen: UIColor = UIColor(displayP3Red: 135.0/255.0, green: 188.0/255.0, blue: 64.0/255.0, alpha: 1.0)
-    static let ColorTeal: UIColor = UIColor(displayP3Red: 50.0/255.0, green: 188.0/255.0, blue: 173.0/255.0, alpha: 1.0)
-    static let ColorOrange: UIColor = UIColor(displayP3Red: 250.0/255.0, green: 162.0/255.0, blue: 28.0/255.0, alpha: 1.0)
-    static let ColorDarkBlue: UIColor = UIColor(displayP3Red: 26.0/255.0, green: 87.0/255.0, blue: 168.0/255.0, alpha: 1.0)
+    static let ColorRed: UIColor = UIColor(red: 221, green: 34, blue: 34)
+    static let ColorBlue: UIColor = UIColor(red: 36, green: 149, blue: 214)
+    static let ColorGreen: UIColor = UIColor(red: 135, green: 188, blue: 64)
+    static let ColorTeal: UIColor = UIColor(red: 50, green: 188, blue: 173)
+    static let ColorOrange: UIColor = UIColor(red: 250, green: 162, blue: 28)
+    static let ColorDarkBlue: UIColor = UIColor(red: 26, green: 87, blue: 168)
     
     // Assign color based on team input
     static func getTeamColor(team: Int) -> UIColor {

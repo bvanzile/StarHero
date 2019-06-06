@@ -17,12 +17,12 @@ class FighterShipWanderState: State {
     
     // Function for entering into a state
     func enter(object: BaseObject) {
+        //print("Entering Wander")
         if let fighterShip = object as? FighterShip {
             //print("\(fighterShip.name!) entering wander state")
             
             // If the ship still sees something, attack it
             if fighterShip.seesEnemyFighterShip() {
-                print("Cancel wander, attacking")
                 fighterShip.stateMachine?.changeState(newState: FighterShipAttackState.sharedInstance)
             }
             else {

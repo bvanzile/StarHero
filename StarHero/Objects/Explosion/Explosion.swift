@@ -41,14 +41,12 @@ class Explosion: BaseObject, VectorMath {
         name = getUniqueName()
         explosionOrigin.name = name
         
-        for _ in 0..<8 {
-            self.addExplosion()
+        for _ in 0..<Config.InitialExplosions {
+            self.addExplosion(ignoreForce: true)
         }
-        
-        print("New explosion: size \(self.size), duration \(self.duration)")
     }
     
-    private func addExplosion() {
+    private func addExplosion(ignoreForce: Bool = false) {
         let explosion = SKShapeNode(rectOf: CGSize(width: blockSize, height: blockSize))
         
         explosion.fillColor = Config.ExplosionColors[colorIndex]
@@ -59,11 +57,15 @@ class Explosion: BaseObject, VectorMath {
             colorIndex += 1
         }
         
+        var appliedForce: Vector = Vector()
+        if !ignoreForce {
+            appliedForce = force * CGFloat.random(in: 0...1)
+        }
+        
+        explosion.position = ((randomVector() * (CGFloat.random(in: 0...1) * size / 2)) + appliedForce).toCGPoint()
         explosion.lineWidth = 0
         explosion.isAntialiased = false
-        explosion.position = (randomVector() * (CGFloat.random(in: 0...1) * size / 2)).toCGPoint()
         explosion.run(SKAction.sequence([SKAction.wait(forDuration: 0.3),
-                                         //SKAction.fadeOut(withDuration: 0.1),
                                          SKAction.removeFromParent()]))
         explosionOrigin.addChild(explosion)
     }
@@ -89,7 +91,6 @@ class Explosion: BaseObject, VectorMath {
         
         // Once the explosion is completed, remove it from the game
         if explosionOrigin.children.isEmpty {
-            print("Explosion done")
             return false
         }
         

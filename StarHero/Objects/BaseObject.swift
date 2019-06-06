@@ -86,6 +86,8 @@ class BaseObject: Equatable {
     func handleCollision(_ object: BaseObject?) { }             // Handle a collision with the passed through object
     func seeObject(_ object: BaseObject?) { }                   // Handle collision of sight box with an object
     func loseSightOnObject(_ object: BaseObject?) { }           // Handle losing collision on sight box with an object
+    func objectInPeripheralRange(_ object: BaseObject?) { }     // Handle collision of peripheral sight box contacting with an object
+    func objectOutOfPeripheralRange(_ object: BaseObject?) { }  // Handle losing collision of peripheral sight box with an object
     func inputTouchDown(touchPos: CGPoint) { }                  // Handle the different inputs from the game screen
     func inputTouchUp(touchPos: CGPoint) { }                    // Handle the different inputs from the game screen
     func inputTouchMoved(touchPos: CGPoint) { }                 // Handle the different inputs from the game screen

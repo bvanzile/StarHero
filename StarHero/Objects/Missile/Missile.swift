@@ -84,7 +84,7 @@ class Missile: MovingObject {
         // Check if hit by a missile
         if let _ = object as? Missile {
             // Create an explosion where the ship was destroyed
-            ObjectManager.sharedInstance.addObject(object: Explosion(position: self.position, size: self.radius * 2, duration: 0.3))
+            ObjectManager.sharedInstance.addObject(object: Explosion(position: self.position, size: self.radius * 3, duration: 0.3, force: heading * self.radius * 10))
             
             // If this is someone else's missile, destroy this missile, unlucky
             destroy()
@@ -93,6 +93,9 @@ class Missile: MovingObject {
         else if let fighterShip = object as? FighterShip {
             // Check if this ship is the one who launched the missile, no collision should occur
             if(missileOwner != fighterShip.name) {
+                // Create an explosion where the ship was destroyed
+                ObjectManager.sharedInstance.addObject(object: Explosion(position: self.position + (heading * fighterShip.radius), size: self.radius * 3, duration: 0.3, force: heading * self.radius * 10))
+                
                 // Ran into another fighter ship, got em, destroy the missile
                 destroy()
             }

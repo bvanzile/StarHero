@@ -16,6 +16,7 @@ class MovingObject: BaseObject, VectorMath {
     
     // Steering object
     var steeringBehavior: SteeringBehavior? = nil
+    var objectsToAvoid: [String : MovingObject] = [String : MovingObject]()
     
     // Physics properties
     var mass: CGFloat = 0.0

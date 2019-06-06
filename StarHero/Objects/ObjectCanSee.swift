@@ -49,6 +49,14 @@ extension ObjectCanSee {
         return objectsInSight.isEmpty ? false : true
     }
     
+    // Check if this name is in sight
+    func doesSee(_ objectName: String) -> Bool {
+        if let _ = objectsInSight[objectName] {
+            return true
+        }
+        return false
+    }
+    
     // Return the closest object in sight
     func getClosestObject(to: Vector) -> MovingObject? {
         // The closest moving object
