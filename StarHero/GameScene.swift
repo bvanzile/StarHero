@@ -10,9 +10,6 @@ import SpriteKit
 import GameplayKit
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
-    // The drawing node created with the default project when pressing the screen
-    private var spinnyNode : SKShapeNode?
-    
     // The pause button
     private var pauseButton: SKShapeNode?
     
@@ -24,26 +21,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Set up the object manager for this game scene
         ObjectManager.sharedInstance.setup(scene: self)
+        ObjectManager.sharedInstance.newGame()
         
         // Get the pause button and store it for later
-        self.pauseButton = self.childNode(withName: "//pauseButton") as? SKShapeNode
+        pauseButton = childNode(withName: "//pauseButton") as? SKShapeNode
         if let pauseButton = self.pauseButton {
+            // Put the pause button on the top
             pauseButton.zPosition = Config.RenderPriority.TopLevelMenu
-            print("Inititialized pause button")
-        }
-        
-        // Create shape node to use during mouse interaction
-        let w = (self.size.width + self.size.height) * 0.02
-        self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
-        
-        if let spinnyNode = self.spinnyNode {
-            spinnyNode.lineWidth = 2.5
-            spinnyNode.zPosition = 5.0
             
-            spinnyNode.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(Double.pi), duration: 1)))
-            spinnyNode.run(SKAction.sequence([SKAction.wait(forDuration: 0.5),
-                                              SKAction.fadeOut(withDuration: 0.5),
-                                              SKAction.removeFromParent()]))
+            // Move the pause button to the camera node so it stays on screen
+            pauseButton.move(toParent: ObjectManager.sharedInstance.gameCamera.getNode())
+            
+            print("Inititialized pause button")
         }
         
         // Set the scene as the contact delegate of the physics engine
@@ -52,11 +41,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func touchDown(atPoint pos : CGPoint) {
         print("Touched screen at \(Int(pos.x)), \(Int(pos.y))")
-//        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-//            n.position = pos
-//            n.strokeColor = SKColor.green
-//            self.addChild(n)
-//        }
         
         let touchedNode = self.nodes(at: pos)
         var touchedNodeNames = [String]()

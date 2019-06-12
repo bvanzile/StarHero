@@ -21,10 +21,13 @@ enum SteeringBehaviors {
 
 class SteeringBehavior {
     // The vehicle that is using this steering behavior
-    var movingObject: MovingObject
+    var owner: MovingObject
     
     // The current active steering behavior
     private var activeSteeringBehavior: SteeringBehaviors = SteeringBehaviors.Idle
+    
+    // Radius of how far we are detecting things to avoid
+    var avoidanceRadius: CGFloat = 0.0
     
     // Target vector
     var targetPosition: Vector = Vector()
@@ -36,14 +39,15 @@ class SteeringBehavior {
     var pursuedTarget: MovingObject? = nil
     
     // Constants used for wandering behavior
-    var wanderCircle: Vector = Vector()
-    let wanderJitter: CGFloat = 2.0
-    let wanderRadius: CGFloat = 20.0
-    let wanderDistance: CGFloat = 0.0
+    private var wanderCircle: Vector = Vector()
+    private let wanderJitter: CGFloat = 2.0
+    private let wanderRadius: CGFloat = 20.0
+    private let wanderDistance: CGFloat = 0.0
     
     // Initializer
-    init(object: MovingObject) {
-        self.movingObject = object
+    init(object: MovingObject, avoidanceRadius: CGFloat = 0.0) {
+        self.owner = object
+        self.avoidanceRadius = avoidanceRadius
     }
     
     // Set the current behavior and target
@@ -66,8 +70,8 @@ class SteeringBehavior {
     }
     func setToWander() {
         activeSteeringBehavior = SteeringBehaviors.Wander
-        wanderCircle = movingObject.heading * wanderRadius
-        targetPosition = wanderCircle + movingObject.position
+        wanderCircle = owner.heading * wanderRadius
+        targetPosition = wanderCircle + owner.position
     }
     func setToPursue(target: MovingObject) {
         activeSteeringBehavior = SteeringBehaviors.Pursue
@@ -85,16 +89,16 @@ class SteeringBehavior {
         var avoidanceVelocity = Vector()
         
         // Check if we need to be avoiding anything
-        if !movingObject.objectsToAvoid.isEmpty {
+        if !owner.objectsToAvoid.isEmpty {
             // Stores the closest enemy object to avoid
             var closestObjectToAvoid: MovingObject? = nil
             
             // Iterate through the objects that are close to us
-            for (_, objectInRange) in movingObject.objectsToAvoid {
+            for (_, objectInRange) in owner.objectsToAvoid {
                 if closestObjectToAvoid == nil {
                     closestObjectToAvoid = objectInRange
                 }
-                else if (objectInRange.position - movingObject.position).length() < (closestObjectToAvoid!.position - movingObject.position).length() {
+                else if (objectInRange.position - owner.position).length() < (closestObjectToAvoid!.position - owner.position).length() {
                     closestObjectToAvoid = objectInRange
                 }
             }
@@ -104,14 +108,24 @@ class SteeringBehavior {
                 // Get the velocity that will point us to safety
                 avoidanceVelocity = flee(target: avoidObject.position)
                 
+                // Dampen the avoidance based on how close to the object we are so it looks better
+                let distanceToObject = (avoidObject.position - owner.position).length()
+                let halfwayDistance = distanceToObject - (avoidanceRadius / 2)
+                
+                // Just reduce the velocity if we are further than 50% of the way to colliding
+                if halfwayDistance > 0 && avoidanceRadius != 0 {
+                    // Scale velocity force from 0% to 100% based on how close to half way there we are
+                    avoidanceVelocity = avoidanceVelocity * (((avoidanceRadius / 2) - halfwayDistance) / (avoidanceRadius / 2))
+                }
+                
                 // Reset the wandering circle if we are wandering since we wan't to come out of the avoidance going straight
                 if activeSteeringBehavior == .Wander {
-                    wanderCircle = movingObject.heading * wanderRadius
-                    targetPosition = wanderCircle + movingObject.position
+                    wanderCircle = owner.heading * wanderRadius
+                    targetPosition = wanderCircle + owner.position
                 }
                 
                 // Return the steering force vector
-                return (avoidanceVelocity - movingObject.velocity).truncate(value: movingObject.maxForce)
+                return (avoidanceVelocity - owner.velocity).truncate(value: owner.maxForce)
             }
         }
         
@@ -150,30 +164,30 @@ class SteeringBehavior {
         }
         
         // Return the steering force vector
-        return (desiredVelocity - movingObject.velocity).truncate(value: movingObject.maxForce)
+        return (desiredVelocity - owner.velocity).truncate(value: owner.maxForce)
     }
 
     private func seek(target: Vector? = nil) -> Vector {
         // Limit the desired velocity to 90 degrees right or left so we don't try to come to a stop
         let targetPos = target ?? targetPosition
         
-        let desiredVelocity = targetPos - movingObject.position
+        let desiredVelocity = targetPos - owner.position
 
         // Check if we are trying to turn around
-        if desiredVelocity.dot(vector: movingObject.heading) > 1.5708 {
+        if desiredVelocity.dot(vector: owner.heading) > 1.5708 {
             // Desired velocity is behind, figure out if we need to be turning right or left and change desired to 90 degrees
-            if movingObject.heading.right().dot(vector: desiredVelocity) < 1.5708 {
+            if owner.heading.right().dot(vector: desiredVelocity) < 1.5708 {
                 // Turning around to the right
-                return movingObject.heading.right() * movingObject.maxSpeed
+                return owner.heading.right() * owner.maxSpeed
             }
             else {
                 // Turning around to the left
-                return movingObject.heading.left() * movingObject.maxSpeed
+                return owner.heading.left() * owner.maxSpeed
             }
         }
         else {
             // Target is in front
-            return desiredVelocity.normalize() * movingObject.maxSpeed
+            return desiredVelocity.normalize() * owner.maxSpeed
         }
     }
     
@@ -181,38 +195,38 @@ class SteeringBehavior {
         // Limit the desired velocity to 90 degrees right or left so we don't try to come to a stop
         let targetPos = target ?? targetPosition
         
-        let desiredVelocity = movingObject.position - targetPos
+        let desiredVelocity = owner.position - targetPos
         
         // Check if we are trying to turn around
-        if desiredVelocity.dot(vector: movingObject.heading) > 1.5708 {
+        if desiredVelocity.dot(vector: owner.heading) > 1.5708 {
             // Desired velocity is behind, figure out if we need to be turning right or left and change desired to 90 degrees
-            if movingObject.heading.right().dot(vector: desiredVelocity) < 1.5708 {
+            if owner.heading.right().dot(vector: desiredVelocity) < 1.5708 {
                 // Turning around to the right
-                return movingObject.heading.right() * movingObject.maxSpeed
+                return owner.heading.right() * owner.maxSpeed
             }
             else {
                 // Turning around to the left
-                return movingObject.heading.left() * movingObject.maxSpeed
+                return owner.heading.left() * owner.maxSpeed
             }
         }
         else {
             // Target is in front
-            return desiredVelocity.normalize() * movingObject.maxSpeed
+            return desiredVelocity.normalize() * owner.maxSpeed
         }
     }
     
     private func arrive() -> Vector {
         // Get the distance to the target
-        let vectorToTarget = targetPosition - movingObject.position
+        let vectorToTarget = targetPosition - owner.position
         let distance = vectorToTarget.length()
         
         // Check if we aren't there yet
-        if(distance > (movingObject.radius / 10)) {
+        if(distance > (owner.radius / 10)) {
             // Calculate speed given the desired deceleration rate
-            var speed = distance / movingObject.deceleration
+            var speed = distance / owner.deceleration
             
             // Make sure we aren't moving faster than the max speed
-            speed = speed < movingObject.maxSpeed ? speed : movingObject.maxSpeed
+            speed = speed < owner.maxSpeed ? speed : owner.maxSpeed
             
             // Update the velocity
             return vectorToTarget * (speed / distance)
@@ -228,7 +242,7 @@ class SteeringBehavior {
         wanderCircle = (wanderCircle + Vector(x: CGFloat.random(in: -1..<1) * wanderJitter, y: CGFloat.random(in: -1..<1) * wanderJitter)).normalize() * wanderRadius
         
         // Project the wander circle in front of the moving object
-        targetPosition = movingObject.position + ((movingObject.heading * wanderDistance) + wanderCircle)
+        targetPosition = owner.position + ((owner.heading * wanderDistance) + wanderCircle)
         
         // Return a desired velocity where we seek the position on the wander circle
         return seek()
@@ -237,10 +251,10 @@ class SteeringBehavior {
     private func pursue() -> Vector {
         if let target = pursuedTarget {
             // Vector to the pursued object's current position
-            let distanceToTarget = target.position - movingObject.position
+            let distanceToTarget = target.position - owner.position
             
             // Relative heading
-            let relativeHeading = movingObject.heading.dot(vector: target.heading)
+            let relativeHeading = owner.heading.dot(vector: target.heading)
             
             if relativeHeading > 2.9 {
                 return seek(target: target.position)

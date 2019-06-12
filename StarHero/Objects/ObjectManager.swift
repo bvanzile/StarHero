@@ -26,35 +26,51 @@ class ObjectManager {
     private var newContactQueue = [SKPhysicsContact]()
     private var endedContactQueue = [SKPhysicsContact]()
     
+    // The game scene camera
+    var gameCamera: Camera = Camera()
+    
     // Initializer
     private init() {
-        // Setting up 2 ships for testing
-        //let ship1 = FighterShip(position: Vector(x: -Config.FieldWidth / 2.2, y: Config.FieldHeight / 2.3), heading: Vector(degrees: 315.0), team: Config.Team.RedTeam)
-        //let ship2 = FighterShip(position: Vector(x: Config.FieldWidth / 2.2, y: Config.FieldHeight / 2.3), heading: Vector(degrees: 225.0), team: Config.Team.BlueTeam)
-        //let ship3 = FighterShip(position: Vector(x: -Config.FieldWidth / 2.2, y: -Config.FieldHeight / 2.3), heading: Vector(degrees: 45.0), team: Config.Team.OrangeTeam)
-        //let ship4 = FighterShip(position: Vector(x: Config.FieldWidth / 2.2, y: -Config.FieldHeight / 2.3), heading: Vector(degrees: 135.0), team: Config.Team.GreenTeam)
-        
-        //objects[ship1.name!] = ship1
-        //objects[ship2.name!] = ship2
-        //objects[ship3.name!] = ship3
-        //objects[ship4.name!] = ship4
-        
-        let redShip = FighterShip(position: Vector(x: 0, y: -Config.FieldHeight * 3 / 8), heading: Vector(degrees: CGFloat.random(in: 45...135)), team: Config.Team.RedTeam)
-        let blueShip = FighterShip(position: Vector(x: 0, y: Config.FieldHeight * 3 / 8), heading: Vector(degrees: CGFloat.random(in: 225...315)), team: Config.Team.BlueTeam)
-        
-        objects[redShip.name!] = redShip
-        objects[blueShip.name!] = blueShip
     }
     
     // Setup the scene with objects
     func setup(scene: GameScene) {
         self.gameScene = scene
+        gameScene!.camera = gameCamera.getNode()
+        gameScene!.addChild(gameCamera.getNode())
+        
+        // Only add background image to devices since it lags the emulator currently
+        #if !targetEnvironment(simulator)
+            let background = SKSpriteNode(imageNamed: "Background")
+            background.zPosition = Config.RenderPriority.GameBackground
+            gameScene?.addChild(background)
+        
+        #endif
+    }
+    
+    // Setup a game from scratch
+    func newGame() {
+        let redShip = MotherShip(position: Vector(x: 0, y: -Config.FieldHeight * 3 / 8), heading: Vector(degrees: 90.0), team: Config.Team.getRandomTeam())
+        let blueShip = MotherShip(position: Vector(x: 0, y: Config.FieldHeight * 3 / 8), heading: Vector(degrees: 90.0), team: Config.Team.getRandomTeam())
+        
+        objects[redShip.name!] = redShip
+        objects[blueShip.name!] = blueShip
         
         for (_, object) in objects {
             if let n = object.addToScene() {
                 gameScene?.addChild(n)
             }
         }
+        
+    }
+    
+    // Completely tear down the existing game
+    func teardown() {
+        for (name, _) in objects {
+            removeObject(name)
+        }
+        
+        print("Game torn down: \(objects.count) objects remain")
     }
     
     // Update all of the active objects
@@ -69,9 +85,12 @@ class ObjectManager {
         for (key, object) in objects {
             if !object.update(dTime: timeDelta) {
                 // Remove and destroy the object if false is returned from the update function
-                self.removeObject(inName: key)
+                removeObject(key)
             }
         }
+        
+        // Update the game camera
+        gameCamera.update(time: timeDelta)
     }
     
     // Callback for any function to use to add an object and node to the game scene
@@ -86,13 +105,13 @@ class ObjectManager {
     }
     
     // Delete the passed through object
-    func removeObject(inName: String) {
-        if let object = objects[inName] {
+    func removeObject(_ name: String) {
+        if let object = objects[name] {
             // Triggers the delete method
             object.destroy()
             
             // Remove from the list of active game objects
-            objects.removeValue(forKey: inName)
+            objects.removeValue(forKey: name)
         }
     }
     
@@ -116,12 +135,8 @@ class ObjectManager {
                 for name in touchedNodes {
                     // Take action if the pause button was pressed
                     if(name == "pauseButton") {
-                        //let ship = FighterShip(position: Vector(x: CGFloat.random(in: -Config.FieldWidth/2...Config.FieldWidth/2), y: CGFloat.random(in: -Config.FieldHeight/2...Config.FieldHeight/2)), heading: Vector(degrees: CGFloat.random(in: 0...360)), team: Config.Team.RandomTeam)
-                        let redShip = FighterShip(position: Vector(x: 0, y: -Config.FieldHeight * 3 / 8), heading: Vector(degrees: CGFloat.random(in: 45...135)), team: Config.Team.RedTeam)
-                        let blueShip = FighterShip(position: Vector(x: 0, y: Config.FieldHeight * 3 / 8), heading: Vector(degrees: CGFloat.random(in: 225...315)), team: Config.Team.BlueTeam)
-                        
-                        addObject(object: redShip)
-                        addObject(object: blueShip)
+                        teardown()
+                        newGame()
                     }
                     else {
                         objects[name]?.inputTouchDown(touchPos: pos)
@@ -129,22 +144,19 @@ class ObjectManager {
                 }
             }
             else {
-                // Fire a missile from the center of the screen to the mouse position
-                //let userMissile = Missile(owner: "User", position: Vector(x: 0, y: 0), heading: Vector(point: pos))
-                //addObject(object: userMissile)
-                
-                // Create an explosion at the mouse position
-                let newExplosion = Explosion(position: Vector(point: pos), size: 50, duration: 0.5)
-                addObject(object: newExplosion)
+                // Code for when no game nodes were touched goes here
+                gameCamera.startMoving(pos)
             }
             break
             
         // Touch was stopped at pos
         case Config.TouchUp:
+            gameCamera.stopMoving()
             break
             
         // Touch is moving, currently at pos
         case Config.TouchMoved:
+            gameCamera.movingInput(pos)
             break
             
         default:

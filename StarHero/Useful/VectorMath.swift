@@ -137,6 +137,14 @@ struct Vector: VectorMath {
     func toCGPoint() -> CGPoint {
         return CGPoint(x: x, y: y)
     }
+    
+    // Check if this is a zero'd out vector
+    func isZero() -> Bool {
+        if x == 0 && y == 0 {
+            return true
+        }
+        return false
+    }
 }
 
 // Inheritable class that appends some useful math functions to any class that inherits it

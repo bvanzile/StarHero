@@ -41,6 +41,10 @@ class Missile: MovingObject {
             missileNode.color = Config.getTeamColor(team: self.team)
             missileNode.colorBlendFactor = 1
         }
+        else {
+            missileNode.color = .green
+            missileNode.colorBlendFactor = 1
+        }
         missileNode.zPosition = Config.RenderPriority.GameBottom
         
         // Grab the size of the node
@@ -51,7 +55,7 @@ class Missile: MovingObject {
         missileNode.name = name
         
         // Initialize the physics body used for collision detection
-        missileNode.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: missileNode.size.width / 2.0, height: missileNode.size.height))
+        missileNode.physicsBody = SKPhysicsBody(rectangleOf: CGSize(width: missileNode.size.width / 3.0, height: missileNode.size.height))
         missileNode.physicsBody?.isDynamic = true
         missileNode.physicsBody?.affectedByGravity = false
         missileNode.physicsBody?.categoryBitMask = Config.BitMaskCategory.Missile

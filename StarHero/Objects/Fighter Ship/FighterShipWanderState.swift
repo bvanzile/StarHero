@@ -22,7 +22,7 @@ class FighterShipWanderState: State {
             //print("\(fighterShip.name!) entering wander state")
             
             // If the ship still sees something, attack it
-            if fighterShip.seesEnemyFighterShip() {
+            if fighterShip.seesAttackableEnemy() {
                 fighterShip.stateMachine?.changeState(newState: FighterShipAttackState.sharedInstance)
             }
             else {
@@ -45,6 +45,11 @@ class FighterShipWanderState: State {
             fighterShip.updateVelocity(timeElapsed: dTime)
             fighterShip.updatePosition(timeElapsed: dTime)
             fighterShip.updateNode()
+            
+            // If the ship sees something, attack it
+            if fighterShip.seesAttackableEnemy() {
+                fighterShip.stateMachine?.changeState(newState: FighterShipAttackState.sharedInstance)
+            }
         }
     }
 }

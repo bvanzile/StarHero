@@ -41,6 +41,7 @@ struct Config {
         static let GameFront: CGFloat = 1.0
         static let GameDefault: CGFloat = 0.0
         static let GameBottom: CGFloat = -1.0
+        static let GameBackground: CGFloat = -2.0
     }
     
     // Collision detection: bitmask categories
@@ -57,8 +58,23 @@ struct Config {
     // For the game pause button
     static let PauseButtonAlpha: CGFloat = 0.5
     
-    // Sprite image locations
-    static let FighterShipLocation: String = "FighterShipDetailed"
+    // Sprite image locations - Mothership
+    static let MotherShipLocation: String = "MotherShip2"
+    static let MotherShipScale: CGFloat = 1.25           // Factor to scale the fighter ship to from image size to screen size
+    
+    // Fighter ship physics configurations
+    static let MotherShipMass: CGFloat = 200            // Weight of the ship for movement physics
+    static let MotherShipMaxSpeed: CGFloat = 20         // Units/second
+    static let MotherShipTakeoffSpeed: CGFloat = 1      // Units/second
+    static let MotherShipMaxForce: CGFloat = 150        // For acceleration/turn rate
+    static let MotherShipDeceleration: CGFloat = 0.5    // Rate of deceleration for an arrival, higher is faster
+    
+    // Mothership actions
+    static let MotherShipSpawnCooldown: Double = 8.0    // How long between fighter ship spawns
+    static let MotherShipInitialSpawn: Int = 4          // How many fighters spawn at the start
+    
+    // Sprite image locations - Fightership
+    static let FighterShipLocation: String = "FighterShipEmpty"
     static let FighterShipScale: CGFloat = 0.3           // Factor to scale the fighter ship to from image size to screen size
     
     // Fighter ship physics configurations
@@ -68,16 +84,16 @@ struct Config {
     static let FighterShipMaxForce: CGFloat = 75         // For acceleration/turn rate
     static let FighterShipDeceleration: CGFloat = 0.8    // Rate of deceleration for an arrival, higher is faster
     static let FighterShipSightDistance: CGFloat = 1100.0
-    static let FighterShipSightPeripheral: CGFloat = 100.0
-    static let FighterShipPeripheralRadius: CGFloat = 200.0
+    static let FighterShipSightFOV: CGFloat = 100.0
+    static let FighterShipPeripheralRadius: CGFloat = 210.0
     
     // Special fighter ship configurations
     static let FighterShipMaxMissileCount: Int = 2
-    static let FighterShipFiringLimit: CGFloat = 1.0
+    static let FighterShipFiringLimit: CGFloat = 0.75
     static let FighterShipReloadCooldown: CGFloat = 2.0
     
     // Missile constants
-    static let MissileLocation: String = "Missile"
+    static let MissileLocation: String = "MissilePlain"
     static let MissileScale: CGFloat = 0.1
     
     // Missile physics

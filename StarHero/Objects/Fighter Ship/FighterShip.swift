@@ -32,6 +32,7 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
     var missileReloadCooldown: CGFloat = 0.0
     var missileLaunchSide: Int = Int.random(in: 0...1)
     
+    let debugging: Bool = false
     var debugText: SKLabelNode = SKLabelNode(text: "test")
     
     // Initialize the fighter ship
@@ -56,6 +57,7 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
         
         // Grab the size of the node
         radius = (fighterShipNode.size.width + fighterShipNode.size.height) / 4
+        attackable = true
         
         // Set the name for this instance and for the sprite node
         name = getUniqueName()
@@ -66,14 +68,14 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
         fighterShipNode.physicsBody?.isDynamic = true
         fighterShipNode.physicsBody?.affectedByGravity = false
         fighterShipNode.physicsBody?.categoryBitMask = Config.BitMaskCategory.FighterShip
-        fighterShipNode.physicsBody?.contactTestBitMask = Config.BitMaskCategory.FighterShip
+        fighterShipNode.physicsBody?.contactTestBitMask = Config.BitMaskCategory.FighterShip + Config.BitMaskCategory.MotherShip
         fighterShipNode.physicsBody?.collisionBitMask = 0x0
         
         // Move the sight to be in front of the ship and not visible
         sightNode.position = CGPoint(x: 0, y: radius + 0.01)
         sightNode.isHidden = true
         sightNode.name = self.name! + ".Sight"
-        setupSightPhysicsBody(degrees: Config.FighterShipSightPeripheral, distance: Config.FighterShipSightDistance, canSee: Config.BitMaskCategory.FighterShip + Config.BitMaskCategory.Missile)
+        setupSightPhysicsBody(degrees: Config.FighterShipSightFOV, distance: Config.FighterShipSightDistance, canSee: Config.BitMaskCategory.FighterShip + Config.BitMaskCategory.Missile + Config.BitMaskCategory.MotherShip)
         
         // Add the sight node to the fighter ship
         fighterShipNode.addChild(sightNode)
@@ -82,22 +84,34 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
         peripheralNode.position = CGPoint(x: 0, y: 0)
         peripheralNode.isHidden = true
         peripheralNode.name = self.name! + ".Peripheral"
-        setupPeripheralPhysicsBody(radius: Config.FighterShipPeripheralRadius, canSee: Config.BitMaskCategory.FighterShip)
+        setupPeripheralPhysicsBody(radius: Config.FighterShipPeripheralRadius, canSee: Config.BitMaskCategory.FighterShip + Config.BitMaskCategory.MotherShip)
         
         // Add the peripheral node to the fighter ship
         fighterShipNode.addChild(peripheralNode)
+        
+        // Update our steering behavior with the peripheral range
+        steeringBehavior?.avoidanceRadius = Config.FighterShipPeripheralRadius
+        
+        // Add a glow to the fighter ship
+//        let effectNode = SKEffectNode()
+//        effectNode.shouldRasterize = true
+//        fighterShipNode.addChild(effectNode)
+//        effectNode.addChild(SKSpriteNode(texture: fighterShipNode.texture))
+//        effectNode.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 30])
         
         debugText.fontSize = 80
         debugText.position = CGPoint(x: 0, y: -150)
         debugText.fontColor = SKColor.yellow
         debugText.text = "0"
-        fighterShipNode.addChild(debugText)
+        if debugging {
+            fighterShipNode.addChild(debugText)
+        }
         
         // Initialize the state machine
         stateMachine = StateMachine(object: self)
         stateMachine?.changeState(newState: FighterShipWanderState.sharedInstance)
         
-        print("Initialized \(self.name!) on team \(self.team)")
+        //print("Initialized \(self.name!) on team \(self.team)")
     }
     
     // Aim and start firing missiles
@@ -113,8 +127,11 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
             // Calculate what an accurate shot would look like
             let accurateShotVelocity = distanceToTarget + (enemy.velocity * lookAheadTime)
             
+            // Measure the size of the angle to be accurate
+            let accurateShotAngle = atan(enemy.radius / accurateShotVelocity.length())
+            
             // Check if our current heading is close enough to start firing
-            if self.heading.dot(vector: accurateShotVelocity) < 0.2 {
+            if self.heading.dot(vector: accurateShotVelocity) <= accurateShotAngle {
                 
                 // Now we need to check if we would hit a friendly
                 if objectsInSight.count > 1 {
@@ -128,9 +145,10 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
                             if distanceToObject.length() < distanceToTarget.length() {
                                 // Let's measure if a shot might hit it
                                 let time = distanceToObject.length() + Config.MissileMaxSpeed
-                                let accurateShot = distanceToObject + (object.velocity * time)
+                                let accurateFriendlyShot = distanceToObject * time
+                                let accurateFriendlyShotAngle = atan(object.radius / accurateFriendlyShot.length())
                                 
-                                if self.heading.dot(vector: accurateShot) < 0.2 {
+                                if self.heading.dot(vector: accurateFriendlyShot) < accurateFriendlyShotAngle + 0.1 {
                                     // Firing a missile right now would hit an ally
                                     return
                                 }
@@ -164,8 +182,9 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
                     // Check if we have any rockets
                     if(missileCount > 0) {
                         // Offset the rocket's position when firing
-                        let missileLaunchOffset: Vector = missileLaunchSide % 1 == 0 ? self.heading.left() * self.radius / 4 : self.heading.right() * self.radius / 4
-                        missileLaunchSide += 1
+                        //let missileLaunchOffset: Vector = missileLaunchSide % 1 == 0 ? self.heading.left() * self.radius / 4 : self.heading.right() * self.radius / 4
+                        //missileLaunchSide += 1
+                        let missileLaunchOffset: Vector = heading * radius
                         
                         let missileLaunchHeading: Vector = accurateShotVelocity.normalize()
                         
@@ -173,7 +192,7 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
                         fireMissile(position: self.position + missileLaunchOffset, heading: missileLaunchHeading)
                         
                         // Handle the missile being fired
-                        missileCount -= 1
+                        //missileCount -= 1
                         
                         if missileCount <= 0 {
                             // Simulate a reload
@@ -191,46 +210,39 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
     }
     
     // Check if this fighter ship sees any other fighter ships
-    func seesEnemyFighterShip() -> Bool {
+    func seesAttackableEnemy() -> Bool {
         // Simply check if we see anything at all first
         if !objectsInSight.isEmpty {
             // Look through what is in sight
             for (_, objInSight) in self.objectsInSight {
-                // Try to cast to fighter ship
-                if let enemy = objInSight as? FighterShip {
-                    // Make sure it's not a friendly
-                    if enemy.team != team {
-                        // Found at least one, so just return true
-                        return true
-                    }
+                // Make sure it's not a friendly
+                if objInSight.team != team && objInSight.attackable {
+                    // Found at least one, so just return true
+                    return true
                 }
             }
         }
-        
         return false
     }
     
     // Get the closest fighter ship that is visible
-    func getClosestEnemyFighterShip(to: Vector? = nil) -> FighterShip? {
+    func getClosestEnemyToAttack(to: Vector? = nil) -> MovingObject? {
         // Unwrap the position we are checking for closeness to, default is this ship's position
         let location = to ?? self.position
         
         // The closest moving object
-        var closest: FighterShip?
+        var closest: MovingObject?
         
         // Look through what this object can see and grab the closest
-        for (_, objInSight) in self.objectsInSight {
-            // Try to cast to fighter ship
-            if let fighterShipInSight = objInSight as? FighterShip {
-                // Check if this is the closest/an enemy and make it the new return value if so
-                if fighterShipInSight.isActive && fighterShipInSight.team != team {
-                    if closest == nil {
-                        closest = fighterShipInSight
-                    }
-                    else {
-                        if((closest!.position - location).length() > (fighterShipInSight.position - location).length()) {
-                            closest = fighterShipInSight
-                        }
+        for (_, objectInSight) in self.objectsInSight {
+            // Check if this is the closest/an enemy and make it the new return value if so
+            if objectInSight.isActive && objectInSight.team != team && objectInSight.attackable {
+                if closest == nil {
+                    closest = objectInSight
+                }
+                else {
+                    if((closest!.position - location).length() > (objectInSight.position - location).length()) {
+                        closest = objectInSight
                     }
                 }
             }
@@ -268,11 +280,9 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
         if let missile = object as? Missile {
             // Ignore this missile it belongs to this ship
             if(missile.missileOwner != name) {
-                // Determine the force behind the explosion
+                // Determine the force behind the explosion and then explode
                 let force = ((velocity * mass) + (missile.velocity * missile.mass)).normalize()
-                
-                // Create an explosion where the ship was destroyed
-                ObjectManager.sharedInstance.addObject(object: Explosion(position: self.position, size: self.radius * 2.3, duration: 0.7, force: force * self.radius * 2.5))
+                explode(sizeScale: 1.15, force: force, forceFactor: 2.5)
                 
                 // If this is someone else's missile, destroy this ship
                 destroy()
@@ -282,13 +292,25 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
         else if let fighterShip = object as? FighterShip {
             // Ignore if this ship is on our team
             if(fighterShip.team != team) {
-                // Determine the force behind the explosion
+                // Determine the force behind the explosion and then explode
                 let force = ((velocity * mass) + (fighterShip.velocity * fighterShip.mass)).normalize()
+                explode(sizeScale: 1.0, force: force, forceFactor: 3)
+                
+                // Ran into another fighter ship, destroy this ship
+                destroy()
+            }
+        }
+        // Check if ran into another mother ship
+        else if let motherShip = object as? MotherShip {
+            // Ignore if this ship is on our team
+            if(motherShip.team != team) {
+                // Determine the force behind the explosion
+                let force = ((velocity * mass) + (motherShip.velocity * motherShip.mass)).normalize()
                 
                 // Create an explosion where the ship was destroyed
                 ObjectManager.sharedInstance.addObject(object: Explosion(position: self.position, size: self.radius * 2, duration: 0.9, force: force * self.radius * 3))
                 
-                // Ran into another fighter ship, destroy this ship
+                // Ran into a mothership, destroy this ship
                 destroy()
             }
         }
@@ -300,16 +322,12 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
             // Add the new spotted ship to the list
             if let name = spottedFighterShip.name {
                 objectsInSight[name] = spottedFighterShip
-                    
-                // Don't attack the ship if they are on our team
-                if spottedFighterShip.team != team {
-                    
-                    // Ignore if we are already attacking or dodging
-                    if !stateMachine!.isInState(FighterShipAttackState.sharedInstance, FighterShipDodgeState.sharedInstance) {
-                        // Make the spotted fighter ship the target
-                        stateMachine?.changeState(newState: FighterShipAttackState.sharedInstance)
-                    }
-                }
+            }
+        }
+        else if let spottedMotherShip = object as? MotherShip {
+            // Add the new spotted ship to the list
+            if let name = spottedMotherShip.name {
+                objectsInSight[name] = spottedMotherShip
             }
         }
         else if let spottedMissile = object as? Missile {
@@ -372,12 +390,30 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
                 }
             }
         }
+        else if let motherShip = object as? MotherShip {
+            // Add the new spotted ship to the list
+            if let name = motherShip.name {
+                objectsInPeripheral[name] = motherShip
+                
+                // Keep track of enemies separately so we can dodge them
+                if motherShip.team != self.team {
+                    objectsToAvoid[name] = motherShip
+                }
+            }
+        }
     }
     
     // A ship leaves this ship's peripheral range
     override func objectOutOfPeripheralRange(_ object: BaseObject?) {
         if let fighterShip = object as? FighterShip {
             if let name = fighterShip.name {
+                // Just try to remove it
+                objectsInPeripheral.removeValue(forKey: name)
+                objectsToAvoid.removeValue(forKey: name)
+            }
+        }
+        else if let motherShip = object as? MotherShip {
+            if let name = motherShip.name {
                 // Just try to remove it
                 objectsInPeripheral.removeValue(forKey: name)
                 objectsToAvoid.removeValue(forKey: name)
@@ -427,7 +463,7 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
             destroy()
         }
         
-        debugText.text = "\(objectsInSight.count)"
+        debugText.text = "\(objectsInPeripheral.count)"
         
         // Update the fighter ship with the current state
         stateMachine?.update(dTime: dTime)

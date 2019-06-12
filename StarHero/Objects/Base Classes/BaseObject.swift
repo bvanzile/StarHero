@@ -19,6 +19,7 @@ class BaseObject: Equatable {
     
     // Team this object belongs to
     var team: Int = Config.Team.NoTeam
+    var attackable: Bool = false
     
     // Position (x, y) and the direction this object is facing in clockwise degrees
     var position: Vector = Vector()
@@ -69,13 +70,19 @@ class BaseObject: Equatable {
         return self.getNode()
     }
     
-    // Destroy this fighter ship
+    // Destroy this object
     func destroy() {
         if isActive {
             isActive = false
             self.getNode()?.removeFromParent()
             //print("Destroying: \(self.name!)")
         }
+    }
+    
+    // Explode when destroyed
+    func explode(sizeScale: CGFloat = 1.0, duration: Double = 0.7, force: Vector = Vector(), forceFactor: CGFloat = 2.5) {
+        // Create an explosion where the ship was destroyed
+        ObjectManager.sharedInstance.addObject(object: Explosion(position: self.position, size: self.radius * 2 * sizeScale, duration: duration, force: force * self.radius * forceFactor))
     }
     
     ///////

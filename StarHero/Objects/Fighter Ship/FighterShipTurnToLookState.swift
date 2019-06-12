@@ -19,9 +19,9 @@ class FighterShipTurnToLookState: State {
     func enter(object: BaseObject) {
         if let fighterShip = object as? FighterShip {
             // If we see an enemy ship, start attacking it
-            if fighterShip.seesEnemyFighterShip() {
+            if fighterShip.seesAttackableEnemy() {
                 // Begin the pursuit on the closest fighter ship in vision
-                if let closest = fighterShip.getClosestEnemyFighterShip() {
+                if let closest = fighterShip.getClosestEnemyToAttack() {
                     // Start going after the closest ship
                     fighterShip.steeringBehavior?.setToPursue(target: closest)
                     fighterShip.stateMachine?.changeState(newState: FighterShipAttackState.sharedInstance)

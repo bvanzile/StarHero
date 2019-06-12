@@ -9,6 +9,14 @@
 /* Begin PBXBuildFile section */
 		465CBD6022A83C2E00CBB560 /* Explosion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CBD5F22A83C2E00CBB560 /* Explosion.swift */; };
 		465CBD6222A997FB00CBB560 /* ObjectPeripheralSight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CBD6122A997FB00CBB560 /* ObjectPeripheralSight.swift */; };
+		465CBD6522AAD36C00CBB560 /* FighterEmpty.png in Resources */ = {isa = PBXBuildFile; fileRef = 465CBD6322AAD36C00CBB560 /* FighterEmpty.png */; };
+		465CBD6622AAD36C00CBB560 /* FighterFilled.png in Resources */ = {isa = PBXBuildFile; fileRef = 465CBD6422AAD36C00CBB560 /* FighterFilled.png */; };
+		465CBD6922AAD4CD00CBB560 /* FighterShipEmpty.png in Resources */ = {isa = PBXBuildFile; fileRef = 465CBD6722AAD4CD00CBB560 /* FighterShipEmpty.png */; };
+		465CBD6A22AAD4CD00CBB560 /* FighterShipFilled.png in Resources */ = {isa = PBXBuildFile; fileRef = 465CBD6822AAD4CD00CBB560 /* FighterShipFilled.png */; };
+		465CBD6E22AADE9C00CBB560 /* MotherShip2.png in Resources */ = {isa = PBXBuildFile; fileRef = 465CBD6B22AADE9C00CBB560 /* MotherShip2.png */; };
+		465CBD6F22AADE9C00CBB560 /* MotherShip3.png in Resources */ = {isa = PBXBuildFile; fileRef = 465CBD6C22AADE9C00CBB560 /* MotherShip3.png */; };
+		465CBD7022AADE9C00CBB560 /* MotherShip1.png in Resources */ = {isa = PBXBuildFile; fileRef = 465CBD6D22AADE9C00CBB560 /* MotherShip1.png */; };
+		465CBD7222AADEDB00CBB560 /* MotherShip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CBD7122AADEDB00CBB560 /* MotherShip.swift */; };
 		465CEF542283A2720082E062 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEF532283A2720082E062 /* AppDelegate.swift */; };
 		465CEF582283A2720082E062 /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = 465CEF572283A2720082E062 /* Actions.sks */; };
 		465CEF5C2283A2720082E062 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEF5B2283A2720082E062 /* GameViewController.swift */; };
@@ -26,6 +34,9 @@
 		465CEFA72291BBAE0082E062 /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEFA62291BBAE0082E062 /* State.swift */; };
 		465CEFA92291D0FF0082E062 /* StateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEFA82291D0FF0082E062 /* StateMachine.swift */; };
 		465CEFAB2291E38B0082E062 /* FighterShipWanderState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEFAA2291E38B0082E062 /* FighterShipWanderState.swift */; };
+		4664D13822AC63E200CFC4C6 /* MissilePlain.png in Resources */ = {isa = PBXBuildFile; fileRef = 4664D13722AC63E200CFC4C6 /* MissilePlain.png */; };
+		4664D13A22AC711E00CFC4C6 /* Background.png in Resources */ = {isa = PBXBuildFile; fileRef = 4664D13922AC711E00CFC4C6 /* Background.png */; };
+		4693C12122B1A1930043D08C /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4693C12022B1A1930043D08C /* Camera.swift */; };
 		46B94D7B229B6A45004DAC49 /* FighterShipTurnToLookState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46B94D7A229B6A45004DAC49 /* FighterShipTurnToLookState.swift */; };
 		46B94D7D229B9043004DAC49 /* FighterShipDodgeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46B94D7C229B9043004DAC49 /* FighterShipDodgeState.swift */; };
 		46EBC27F229364A800CBF2F6 /* VectorMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEFAE229362C10082E062 /* VectorMath.swift */; };
@@ -62,6 +73,14 @@
 /* Begin PBXFileReference section */
 		465CBD5F22A83C2E00CBB560 /* Explosion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Explosion.swift; sourceTree = "<group>"; };
 		465CBD6122A997FB00CBB560 /* ObjectPeripheralSight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectPeripheralSight.swift; sourceTree = "<group>"; };
+		465CBD6322AAD36C00CBB560 /* FighterEmpty.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FighterEmpty.png; sourceTree = "<group>"; };
+		465CBD6422AAD36C00CBB560 /* FighterFilled.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FighterFilled.png; sourceTree = "<group>"; };
+		465CBD6722AAD4CD00CBB560 /* FighterShipEmpty.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FighterShipEmpty.png; sourceTree = "<group>"; };
+		465CBD6822AAD4CD00CBB560 /* FighterShipFilled.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = FighterShipFilled.png; sourceTree = "<group>"; };
+		465CBD6B22AADE9C00CBB560 /* MotherShip2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MotherShip2.png; sourceTree = "<group>"; };
+		465CBD6C22AADE9C00CBB560 /* MotherShip3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MotherShip3.png; sourceTree = "<group>"; };
+		465CBD6D22AADE9C00CBB560 /* MotherShip1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MotherShip1.png; sourceTree = "<group>"; };
+		465CBD7122AADEDB00CBB560 /* MotherShip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotherShip.swift; sourceTree = "<group>"; };
 		465CEF502283A2720082E062 /* StarHero.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StarHero.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		465CEF532283A2720082E062 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		465CEF552283A2720082E062 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
@@ -87,6 +106,9 @@
 		465CEFA82291D0FF0082E062 /* StateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateMachine.swift; sourceTree = "<group>"; };
 		465CEFAA2291E38B0082E062 /* FighterShipWanderState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FighterShipWanderState.swift; sourceTree = "<group>"; };
 		465CEFAE229362C10082E062 /* VectorMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VectorMath.swift; sourceTree = "<group>"; };
+		4664D13722AC63E200CFC4C6 /* MissilePlain.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MissilePlain.png; sourceTree = "<group>"; };
+		4664D13922AC711E00CFC4C6 /* Background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Background.png; sourceTree = "<group>"; };
+		4693C12022B1A1930043D08C /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
 		46B94D7A229B6A45004DAC49 /* FighterShipTurnToLookState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FighterShipTurnToLookState.swift; sourceTree = "<group>"; };
 		46B94D7C229B9043004DAC49 /* FighterShipDodgeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FighterShipDodgeState.swift; sourceTree = "<group>"; };
 		46EBC2BA2294870F00CBF2F6 /* SteeringBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SteeringBehavior.swift; sourceTree = "<group>"; };
@@ -132,6 +154,33 @@
 				465CBD5F22A83C2E00CBB560 /* Explosion.swift */,
 			);
 			path = Explosion;
+			sourceTree = "<group>";
+		};
+		465CBD7322AADEE200CBB560 /* MotherShip */ = {
+			isa = PBXGroup;
+			children = (
+				465CBD7122AADEDB00CBB560 /* MotherShip.swift */,
+			);
+			path = MotherShip;
+			sourceTree = "<group>";
+		};
+		465CBD7422AADF3B00CBB560 /* Object Behaviors */ = {
+			isa = PBXGroup;
+			children = (
+				46EBC2BA2294870F00CBF2F6 /* SteeringBehavior.swift */,
+				46EBC2D122985DCF00CBF2F6 /* ObjectCanSee.swift */,
+				465CBD6122A997FB00CBB560 /* ObjectPeripheralSight.swift */,
+			);
+			path = "Object Behaviors";
+			sourceTree = "<group>";
+		};
+		465CBD7522AADF4A00CBB560 /* Base Classes */ = {
+			isa = PBXGroup;
+			children = (
+				465CEF9B228F775F0082E062 /* MovingObject.swift */,
+				465CEF87228F151A0082E062 /* BaseObject.swift */,
+			);
+			path = "Base Classes";
 			sourceTree = "<group>";
 		};
 		465CEF472283A2720082E062 = {
@@ -195,14 +244,13 @@
 			isa = PBXGroup;
 			children = (
 				465CEFA52291BB8B0082E062 /* State Machine */,
+				4693C12222B1A1A40043D08C /* Camera */,
 				465CBD5E22A83C2100CBB560 /* Explosion */,
 				46EBC2CA2297083000CBF2F6 /* Missile */,
 				465CEFA42291B6770082E062 /* Fighter Ship */,
-				46EBC2BA2294870F00CBF2F6 /* SteeringBehavior.swift */,
-				46EBC2D122985DCF00CBF2F6 /* ObjectCanSee.swift */,
-				465CBD6122A997FB00CBB560 /* ObjectPeripheralSight.swift */,
-				465CEF9B228F775F0082E062 /* MovingObject.swift */,
-				465CEF87228F151A0082E062 /* BaseObject.swift */,
+				465CBD7322AADEE200CBB560 /* MotherShip */,
+				465CBD7422AADF3B00CBB560 /* Object Behaviors */,
+				465CBD7522AADF4A00CBB560 /* Base Classes */,
 				465CEFA22290A94E0082E062 /* ObjectManager.swift */,
 			);
 			path = Objects;
@@ -211,6 +259,15 @@
 		465CEF8E228F1AAC0082E062 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				4664D13922AC711E00CFC4C6 /* Background.png */,
+				4664D13722AC63E200CFC4C6 /* MissilePlain.png */,
+				465CBD6D22AADE9C00CBB560 /* MotherShip1.png */,
+				465CBD6B22AADE9C00CBB560 /* MotherShip2.png */,
+				465CBD6C22AADE9C00CBB560 /* MotherShip3.png */,
+				465CBD6722AAD4CD00CBB560 /* FighterShipEmpty.png */,
+				465CBD6822AAD4CD00CBB560 /* FighterShipFilled.png */,
+				465CBD6322AAD36C00CBB560 /* FighterEmpty.png */,
+				465CBD6422AAD36C00CBB560 /* FighterFilled.png */,
 				46EBC2CB22970C2B00CBF2F6 /* Missile.png */,
 				46EBC2C8229705A500CBF2F6 /* FighterShipDetailed.png */,
 				465CEF97228F64660082E062 /* FighterShip.png */,
@@ -249,6 +306,14 @@
 				465CEFA82291D0FF0082E062 /* StateMachine.swift */,
 			);
 			path = "State Machine";
+			sourceTree = "<group>";
+		};
+		4693C12222B1A1A40043D08C /* Camera */ = {
+			isa = PBXGroup;
+			children = (
+				4693C12022B1A1930043D08C /* Camera.swift */,
+			);
+			path = Camera;
 			sourceTree = "<group>";
 		};
 		46EBC2CA2297083000CBF2F6 /* Missile */ = {
@@ -364,11 +429,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				46EBC28522936A1A00CBF2F6 /* GameScene.sks in Resources */,
+				465CBD6A22AAD4CD00CBB560 /* FighterShipFilled.png in Resources */,
+				465CBD6922AAD4CD00CBB560 /* FighterShipEmpty.png in Resources */,
+				465CBD6E22AADE9C00CBB560 /* MotherShip2.png in Resources */,
+				465CBD6622AAD36C00CBB560 /* FighterFilled.png in Resources */,
 				465CEF98228F64660082E062 /* FighterShip.png in Resources */,
 				46EBC2CC22970C2B00CBF2F6 /* Missile.png in Resources */,
 				46EBC2C9229705A500CBF2F6 /* FighterShipDetailed.png in Resources */,
+				465CBD7022AADE9C00CBB560 /* MotherShip1.png in Resources */,
+				4664D13A22AC711E00CFC4C6 /* Background.png in Resources */,
 				465CEF5F2283A2720082E062 /* Main.storyboard in Resources */,
+				465CBD6522AAD36C00CBB560 /* FighterEmpty.png in Resources */,
+				465CBD6F22AADE9C00CBB560 /* MotherShip3.png in Resources */,
 				465CEF612283A2750082E062 /* Assets.xcassets in Resources */,
+				4664D13822AC63E200CFC4C6 /* MissilePlain.png in Resources */,
 				465CEF642283A2750082E062 /* LaunchScreen.storyboard in Resources */,
 				465CEF582283A2720082E062 /* Actions.sks in Resources */,
 			);
@@ -401,6 +475,7 @@
 				46EBC2D0229851C400CBF2F6 /* FighterShipAttackState.swift in Sources */,
 				46EBC2BD22948D9400CBF2F6 /* FighterShipIdleState.swift in Sources */,
 				46EBC2D222985DCF00CBF2F6 /* ObjectCanSee.swift in Sources */,
+				465CBD7222AADEDB00CBB560 /* MotherShip.swift in Sources */,
 				465CEF88228F151A0082E062 /* BaseObject.swift in Sources */,
 				465CEFA72291BBAE0082E062 /* State.swift in Sources */,
 				465CEFA32290A94E0082E062 /* ObjectManager.swift in Sources */,
@@ -415,6 +490,7 @@
 				465CBD6222A997FB00CBB560 /* ObjectPeripheralSight.swift in Sources */,
 				465CBD6022A83C2E00CBB560 /* Explosion.swift in Sources */,
 				465CEF542283A2720082E062 /* AppDelegate.swift in Sources */,
+				4693C12122B1A1930043D08C /* Camera.swift in Sources */,
 				465CEF8B228F17590082E062 /* FighterShip.swift in Sources */,
 				465CEFAB2291E38B0082E062 /* FighterShipWanderState.swift in Sources */,
 				46B94D7D229B9043004DAC49 /* FighterShipDodgeState.swift in Sources */,

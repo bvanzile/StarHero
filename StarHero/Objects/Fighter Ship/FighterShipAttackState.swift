@@ -21,13 +21,13 @@ class FighterShipAttackState: State {
         if let fighterShip = object as? FighterShip {
             // Check if we see anything
             //print("\(fighterShip.name!) is attacking")
-            if !fighterShip.seesEnemyFighterShip() {
+            if !fighterShip.seesAttackableEnemy() {
                 // Nothing in sight so go back to wandering
                 fighterShip.stateMachine?.changeState(newState: FighterShipWanderState.sharedInstance)
             }
             else {
                 // Begin the pursuit on the closest fighter ship in vision
-                if let closest = fighterShip.getClosestEnemyFighterShip() {
+                if let closest = fighterShip.getClosestEnemyToAttack() {
                     // Start going after the closest ship
                     fighterShip.steeringBehavior?.setToPursue(target: closest)
                 }
@@ -72,7 +72,7 @@ class FighterShipAttackState: State {
                     }
                     
                     // Check if we still see something to attack
-                    if fighterShip.seesEnemyFighterShip() {
+                    if fighterShip.seesAttackableEnemy() {
                         fighterShip.stateMachine?.changeState(newState: FighterShipAttackState.sharedInstance)
                     }
                     else {
