@@ -108,16 +108,6 @@ class SteeringBehavior {
                 // Get the velocity that will point us to safety
                 avoidanceVelocity = flee(target: avoidObject.position)
                 
-                // Dampen the avoidance based on how close to the object we are so it looks better
-                let distanceToObject = (avoidObject.position - owner.position).length()
-                let halfwayDistance = distanceToObject - (avoidanceRadius / 2)
-                
-                // Just reduce the velocity if we are further than 50% of the way to colliding
-                if halfwayDistance > 0 && avoidanceRadius != 0 {
-                    // Scale velocity force from 0% to 100% based on how close to half way there we are
-                    avoidanceVelocity = avoidanceVelocity * (((avoidanceRadius / 2) - halfwayDistance) / (avoidanceRadius / 2))
-                }
-                
                 // Reset the wandering circle if we are wandering since we wan't to come out of the avoidance going straight
                 if activeSteeringBehavior == .Wander {
                     wanderCircle = owner.heading * wanderRadius

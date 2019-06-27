@@ -104,6 +104,13 @@ class ObjectManager {
         return true
     }
     
+    // Callback for any function to use to add a node to the game scene, the object is responsible for removing when necessary!
+    @discardableResult
+    func addNode(node: SKNode) -> Bool {
+        gameScene?.addChild(node)
+        return true
+    }
+    
     // Delete the passed through object
     func removeObject(_ name: String) {
         if let object = objects[name] {
@@ -180,6 +187,8 @@ class ObjectManager {
         
         // Unwrap both node names and make sure they exist
         if let firstNodeName = contact.bodyA.node?.name, let secondNodeName = contact.bodyB.node?.name {
+            //print("\(firstNodeName) sees \(secondNodeName)")
+            
             // Check if an object was seen or if objects collided
             if firstNodeName.contains(".Sight") || secondNodeName.contains(".Sight") {
                 var nameWhoSaw: String, otherName: String
@@ -297,6 +306,17 @@ class ObjectManager {
                 
                 //print("\(nameWhoSaw) moved away from \(otherName)")
                 objects[nameWhoSaw]?.objectOutOfPeripheralRange(objects[otherName])
+            }
+            else {
+                // Don't do anything if they belong to the same object
+                if firstNodeName.components(separatedBy: ".")[0] == secondNodeName.components(separatedBy: ".")[0] {
+                    return
+                }
+                
+                // Handle the collision between two physical objects
+                objects[firstNodeName]?.handleStopColliding(objects[secondNodeName])
+                objects[secondNodeName]?.handleStopColliding(objects[firstNodeName])
+                //print("\(firstNodeName) has ended collision with \(secondNodeName)")
             }
         }
     }

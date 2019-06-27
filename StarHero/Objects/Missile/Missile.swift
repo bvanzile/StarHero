@@ -104,9 +104,15 @@ class Missile: MovingObject {
                 destroy()
             }
         }
+        // Check if collided with a mothership
+        else if let _ = object as? MotherShip {
+            // Create an explosion where the mothership was hit
+            ObjectManager.sharedInstance.addObject(object: Explosion(position: position, size: self.radius * 3, duration: 0.3, force: heading * self.radius * 8))
+            destroy()
+        }
     }
     
-    override func getNode() -> SKNode? {
+    override func getNode() -> SKNode {
         return missileNode
     }
 }

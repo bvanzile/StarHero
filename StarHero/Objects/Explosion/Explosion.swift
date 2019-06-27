@@ -97,5 +97,5 @@ class Explosion: BaseObject, VectorMath {
         return true
     }
     
-    override func getNode() -> SKNode? { return explosionOrigin }
+    override func getNode() -> SKNode { return explosionOrigin }
 }

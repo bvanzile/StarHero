@@ -13,6 +13,9 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
     // Sprite for fighter ships
     private let fighterShipNode = SKSpriteNode(imageNamed: Config.FighterShipLocation)
     
+    // Controls whether the fightership can attack right now
+    var canAttack: Bool = true
+    
     // Declare the required sight nodes
     var sightNode = SKShapeNode()
     var peripheralNode = SKShapeNode()
@@ -32,7 +35,7 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
     var missileReloadCooldown: CGFloat = 0.0
     var missileLaunchSide: Int = Int.random(in: 0...1)
     
-    let debugging: Bool = false
+    let debugging: Bool = true
     var debugText: SKLabelNode = SKLabelNode(text: "test")
     
     // Initialize the fighter ship
@@ -77,17 +80,17 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
         sightNode.name = self.name! + ".Sight"
         setupSightPhysicsBody(degrees: Config.FighterShipSightFOV, distance: Config.FighterShipSightDistance, canSee: Config.BitMaskCategory.FighterShip + Config.BitMaskCategory.Missile + Config.BitMaskCategory.MotherShip)
         
-        // Add the sight node to the fighter ship
-        fighterShipNode.addChild(sightNode)
+        // Add the sight node to the base node
+        baseNode.addChild(sightNode)
         
         // Create the peripheral vision node for the fighter ship
-        peripheralNode.position = CGPoint(x: 0, y: 0)
+        peripheralNode.position = CGPoint(x: 0, y: Config.FighterShipPeripheralRadius / 2)
         peripheralNode.isHidden = true
         peripheralNode.name = self.name! + ".Peripheral"
         setupPeripheralPhysicsBody(radius: Config.FighterShipPeripheralRadius, canSee: Config.BitMaskCategory.FighterShip + Config.BitMaskCategory.MotherShip)
         
         // Add the peripheral node to the fighter ship
-        fighterShipNode.addChild(peripheralNode)
+        baseNode.addChild(peripheralNode)
         
         // Update our steering behavior with the peripheral range
         steeringBehavior?.avoidanceRadius = Config.FighterShipPeripheralRadius
@@ -99,13 +102,16 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
 //        effectNode.addChild(SKSpriteNode(texture: fighterShipNode.texture))
 //        effectNode.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 30])
         
-        debugText.fontSize = 80
-        debugText.position = CGPoint(x: 0, y: -150)
+        debugText.fontSize = 25
+        debugText.position = CGPoint(x: 0, y: -50)
         debugText.fontColor = SKColor.yellow
         debugText.text = "0"
         if debugging {
-            fighterShipNode.addChild(debugText)
+            baseNode.addChild(debugText)
         }
+        
+        // Add the fighter ship to the base node
+        baseNode.addChild(fighterShipNode)
         
         // Initialize the state machine
         stateMachine = StateMachine(object: self)
@@ -131,7 +137,7 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
             let accurateShotAngle = atan(enemy.radius / accurateShotVelocity.length())
             
             // Check if our current heading is close enough to start firing
-            if self.heading.dot(vector: accurateShotVelocity) <= accurateShotAngle {
+            if self.heading.dot(vector: accurateShotVelocity) <= accurateShotAngle * 1.2 {
                 
                 // Now we need to check if we would hit a friendly
                 if objectsInSight.count > 1 {
@@ -163,8 +169,9 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
                     for (_, object) in objectsInPeripheral {
                         if object.team == team && (object.position - position).length() < radius * 2 {
                             // Determine if we are the one behind the other
-                            if heading.dot(vector: object.position - position) > 1.5708 {
+                            if heading.dot(vector: object.position - position) < 1.5708 {
                                 // We're too close, so dodge a little to the left or right to get a better angle
+                                print("Dodging to get a better angle!")
                                 steeringBehavior?.returnHeading = heading
                                 steeringBehavior?.setToGo(direction: (Bool.random() ? self.heading.right() : self.heading.left()) + heading)
                                 stateMachine?.changeState(newState: FighterShipDodgeState.sharedInstance)
@@ -313,6 +320,21 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
                 // Ran into a mothership, destroy this ship
                 destroy()
             }
+            else {
+                //print("\(name!) is safe in their mothership")
+                attackable = false
+                canAttack = false
+            }
+        }
+    }
+    
+    // Handle a collision with an object
+    override func handleStopColliding(_ object: BaseObject?) {
+        // If we have left the mothership, become active
+        if let _ = object as? MotherShip {
+            //print("Left the safety of the mothership")
+            attackable = true
+            canAttack = true
         }
     }
     
@@ -458,12 +480,8 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
         if(isOutOfBounds() && !stateMachine!.isInState(FighterShipReturnToFieldState.sharedInstance, FighterShipDodgeState.sharedInstance)) {
             stateMachine?.changeState(newState: FighterShipReturnToFieldState.sharedInstance)
         }
-        else if isOutOfBounds(scale: 2.0) {
-            print("\(name!) has ran away! This is probably a bug.")
-            destroy()
-        }
         
-        debugText.text = "\(objectsInPeripheral.count)"
+        debugText.text = "\(objectsToAvoid.count)"
         
         // Update the fighter ship with the current state
         stateMachine?.update(dTime: dTime)
@@ -473,9 +491,5 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
     
     override func inputTouchDown(touchPos: CGPoint) {
         destroy()
-    }
-    
-    override func getNode() -> SKNode? {
-        return fighterShipNode
     }
 }

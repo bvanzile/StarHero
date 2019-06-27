@@ -17,7 +17,6 @@ class FighterShipAttackState: State {
     
     // Function for entering into a state
     func enter(object: BaseObject) {
-        //print("Entering Attack")
         if let fighterShip = object as? FighterShip {
             // Check if we see anything
             //print("\(fighterShip.name!) is attacking")
@@ -52,7 +51,9 @@ class FighterShipAttackState: State {
             if let target = fighterShip.steeringBehavior?.pursuedTarget {
                 // Check if the target is still alive
                 if target.isActive {
-                    fighterShip.attackTarget()
+                    if fighterShip.canAttack {
+                        fighterShip.attackTarget()
+                    }
                     
                     // Change the ship to wander if the velocity returns false (velocity was set to 0 for some reason)
                     fighterShip.updateVelocity(timeElapsed: dTime)

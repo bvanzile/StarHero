@@ -25,6 +25,10 @@ class MovingObject: BaseObject, VectorMath {
     var maxForce: CGFloat = 0.0
     var deceleration: CGFloat = 0.0
     
+    // Boundary properties
+    var boundaryOrigin: SKShapeNode? = nil
+    var boundaryDistance: CGFloat? = nil
+    
     // Initializer
     override init(position: Vector? = nil, heading: Vector? = nil, team: Int = Config.Team.NoTeam) {
         super.init(position: position, heading: heading, team: team)
@@ -59,17 +63,26 @@ class MovingObject: BaseObject, VectorMath {
     // Update the node with the current heading and position
     func updateNode() {
         // Simply apply the position to the node
-        self.getNode()?.position = CGPoint(x: position.x, y: position.y)
+        self.getNode().position = CGPoint(x: position.x, y: position.y)
         
         // Convert from x,y coordinates that start at the right to one that starts at the top
-        self.getNode()?.zRotation = heading.toRads() - degreesToRads(degrees: 90)
+        self.getNode().zRotation = heading.toRads() - degreesToRads(degrees: 90)
+    }
+    
+    // Setup the boundary for this object
+    func setBoundary(origin: SKShapeNode, distance: CGFloat) {
+        boundaryOrigin = origin
+        boundaryDistance = distance
     }
     
     // Check whether this object is within the boundaries
     func isOutOfBounds(scale: CGFloat = 1.0) -> Bool {
         // Check if the ship has moved out of bounds and change the state to return
-        if((position.x * position.x) > ((Config.FieldWidth / 2) * (Config.FieldWidth / 2) * scale) || (position.y * position.y) > ((Config.FieldHeight / 2) * (Config.FieldHeight / 2)) * scale) {
-            return true
+        //if((position.x * position.x) > ((Config.FieldWidth / 2) * (Config.FieldWidth / 2) * scale) || (position.y * position.y) > ((Config.FieldHeight / 2) * (Config.FieldHeight / 2)) * scale) {
+        if let origin = boundaryOrigin, let distance = boundaryDistance {
+            if (position - Vector(point: origin.position)).length() > distance {
+                return true
+            }
         }
         return false
     }

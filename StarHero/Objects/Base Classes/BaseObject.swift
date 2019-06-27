@@ -13,6 +13,9 @@ class BaseObject: Equatable {
     // State of the object
     var isActive: Bool = false
     
+    // Base node that represents this object
+    var baseNode: SKNode = SKNode()
+    
     // Unique name of this object, also used for the node
     var name: String? = nil
     static var uniqueIdentifier: CUnsignedLong = 0
@@ -74,7 +77,7 @@ class BaseObject: Equatable {
     func destroy() {
         if isActive {
             isActive = false
-            self.getNode()?.removeFromParent()
+            self.getNode().removeFromParent()
             //print("Destroying: \(self.name!)")
         }
     }
@@ -88,9 +91,10 @@ class BaseObject: Equatable {
     ///////
     /////// STUBS FOR ALL OBJECT SUB CLASS TO INHERIT
     ///////
-    func getNode() -> SKNode? { return nil }
+    func getNode() -> SKNode { return baseNode }
     func update(dTime: TimeInterval) -> Bool { return false }   // Update the object
     func handleCollision(_ object: BaseObject?) { }             // Handle a collision with the passed through object
+    func handleStopColliding(_ object: BaseObject?) { }         // Handle when a collision ends
     func seeObject(_ object: BaseObject?) { }                   // Handle collision of sight box with an object
     func loseSightOnObject(_ object: BaseObject?) { }           // Handle losing collision on sight box with an object
     func objectInPeripheralRange(_ object: BaseObject?) { }     // Handle collision of peripheral sight box contacting with an object

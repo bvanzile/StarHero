@@ -46,8 +46,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         var touchedNodeNames = [String]()
         for n in touchedNode {
             if let myNode = n.name {
-                print("Touched: \(myNode)")
-                touchedNodeNames.append(myNode)
+                if !myNode.contains(".Peripheral") && !myNode.contains(".Sight") {
+                    print("Touched: \(myNode)")
+                    touchedNodeNames.append(myNode)
+                }
                 
                 // Pause button overrides everything
                 if(myNode == "pauseButton") {

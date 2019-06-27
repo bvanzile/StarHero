@@ -53,8 +53,6 @@ class Camera {
         lastTouchDown?.x += deltaMove.x
         lastTouchDown?.y += deltaMove.y
         
-        print("Moved by \(deltaMove.x), \(deltaMove.y)")
-        
         // Reset the delta since we used it
         deltaMove = Vector()
     }
@@ -71,8 +69,6 @@ class Camera {
     
     // End the camera movement
     func stopMoving() {
-        if !isMoving { print("stopMoving called: Camera was never moving") }
-        
         lastTouchDown = nil
         
         isMoving = false
