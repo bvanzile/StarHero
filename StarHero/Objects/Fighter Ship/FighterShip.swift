@@ -9,7 +9,7 @@
 import Foundation
 import SpriteKit
 
-class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
+class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight, ObjectTouchControls {
     // Sprite for fighter ships
     private let fighterShipNode = SKSpriteNode(imageNamed: Config.FighterShipLocation)
     
@@ -20,12 +20,16 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
     var sightNode = SKShapeNode()
     var peripheralNode = SKShapeNode()
     
-    // The fighter ship state machine
-    var stateMachine: StateMachine?
-    
     // Reference to all of the objects the ship can currently see
     var objectsInSight: [String : MovingObject] = [String : MovingObject]()
     var objectsInPeripheral: [String : MovingObject] = [String : MovingObject]()
+    
+    // Node for touch controls
+    var touchNode: SKShapeNode?
+    var line: SKShapeNode?
+    var path: CGMutablePath?
+    var lastTouchPos: CGPoint?
+    var points: [CGPoint] = [CGPoint]()
     
     // The last known direction that a threat was known, useful after dodging
     var lastThreatHeading: Vector? = nil
@@ -35,12 +39,15 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
     var missileReloadCooldown: CGFloat = 0.0
     var missileLaunchSide: Int = Int.random(in: 0...1)
     
-    let debugging: Bool = true
+    let debugging: Bool = false
     var debugText: SKLabelNode = SKLabelNode(text: "test")
     
+    // The fighter ship state machine
+    var stateMachine: StateMachine?
+    
     // Initialize the fighter ship
-    override init(position: Vector? = nil, heading: Vector? = nil, team: Int = Config.Team.NoTeam) {
-        super.init(position: position, heading: heading, team: team)
+    override init(position: Vector? = nil, heading: Vector? = nil, team: Int = Config.Team.NoTeam, userControlled: Bool = false) {
+        super.init(position: position, heading: heading, team: team, userControlled: userControlled)
         
         // Get all of the default fighter ship physics properties
         mass = Config.FighterShipMass
@@ -64,7 +71,8 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
         
         // Set the name for this instance and for the sprite node
         name = getUniqueName()
-        fighterShipNode.name = name
+        baseNode.name = name! + ".Base"
+        fighterShipNode.name = name! + ".Sprite"
         
         // Initialize the physics body used for collision detection
         fighterShipNode.physicsBody = SKPhysicsBody(circleOfRadius: radius)
@@ -92,8 +100,12 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
         // Add the peripheral node to the fighter ship
         baseNode.addChild(peripheralNode)
         
-        // Update our steering behavior with the peripheral range
-        steeringBehavior?.avoidanceRadius = Config.FighterShipPeripheralRadius
+        // Setup the touch control node
+        touchNode = SKShapeNode(circleOfRadius: self.radius * 3)
+        touchNode!.name = self.name! + ".Touch"
+        setupTouchNode()
+        
+        baseNode.addChild(touchNode!)
         
         // Add a glow to the fighter ship
 //        let effectNode = SKEffectNode()
@@ -146,12 +158,12 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
                         // Check if this one is on our team
                         if object.team == self.team {
                             // Now check if it's closer than the enemy
-                            let distanceToObject = object.position - position
+                            let distanceToFriendly = object.position - position
                             
-                            if distanceToObject.length() < distanceToTarget.length() {
+                            if distanceToFriendly.length() < distanceToTarget.length() {
                                 // Let's measure if a shot might hit it
-                                let time = distanceToObject.length() + Config.MissileMaxSpeed
-                                let accurateFriendlyShot = distanceToObject * time
+                                let time = distanceToFriendly.length() / Config.MissileMaxSpeed
+                                let accurateFriendlyShot = distanceToFriendly * time
                                 let accurateFriendlyShotAngle = atan(object.radius / accurateFriendlyShot.length())
                                 
                                 if self.heading.dot(vector: accurateFriendlyShot) < accurateFriendlyShotAngle + 0.1 {
@@ -489,7 +501,80 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight {
         return true
     }
     
-    override func inputTouchDown(touchPos: CGPoint) {
-        destroy()
+    override func inputTouchDown(touchPos: CGPoint) -> Bool {
+        if userControlled {
+            // Pause everything while the action takes place
+            ObjectManager.sharedInstance.pause()
+            
+            // Setup the path
+            path = CGMutablePath()
+            let firstPoint = (position + (velocity.normalize() * radius * 1.25)).toCGPoint()
+            path!.move(to: firstPoint)
+            points.append(firstPoint)
+            lastTouchPos = touchPos
+            
+            // Remove the previous line node asap if it is still running an action
+            releasePathNode()
+            
+            // Setup the line node
+            line = SKShapeNode()
+            line!.strokeColor = .gray
+            line!.alpha = 0.5
+            line!.lineWidth = 4
+            
+            // Start drawing the line if necessary
+            if position.distanceBetween(vector: Vector(touchPos)) > radius * 1.25 {
+                points.append(drawPath(pos: touchPos))
+                lastTouchPos = touchPos
+            }
+            
+            // Add this node to the scene
+            ObjectManager.sharedInstance.addNode(node: line!)
+            ObjectManager.sharedInstance.activeObject = self
+            
+            return true
+        }
+        
+        return false
+    }
+    
+    override func inputTouchMoved(touchPos: CGPoint) -> Bool {
+        if userControlled {
+            // Start drawing the line when necessary
+            if position.distanceBetween(vector: Vector(touchPos)) > radius * 1.25 && path != nil {
+                points.append(drawPath(pos: touchPos))
+                lastTouchPos = touchPos
+            }
+            
+            return true
+        }
+        
+        return false
+    }
+    
+    override func inputTouchUp(touchPos: CGPoint) -> Bool {
+        if userControlled && ObjectManager.sharedInstance.activeObject == self {
+            // Unpause the game, as the move action is completed
+            ObjectManager.sharedInstance.unpause()
+            
+            // End the path
+            addArrow()
+            releasePathNode(maxSpeed)
+            lastTouchPos = nil
+            
+            // Setup the steering behavior with the path array
+            steeringBehavior!.setToFollowPath(path: points.reversed(), accuracy: 2.0)
+            points.removeAll()
+            
+            // Change into the moving state
+            stateMachine?.changeState(newState: FighterShipMoveState.sharedInstance)
+            
+            // Release self as active object
+            ObjectManager.sharedInstance.activeObject = nil
+            
+            return true
+        }
+        
+        return false
     }
 }

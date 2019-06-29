@@ -22,7 +22,7 @@ struct Vector: VectorMath {
     }
     
     // Initialize a vector from a CGPoint
-    init(point: CGPoint) {
+    init(_ point: CGPoint) {
         x = point.x
         y = point.y
     }

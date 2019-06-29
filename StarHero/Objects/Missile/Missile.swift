@@ -17,7 +17,7 @@ class Missile: MovingObject {
     var missileOwner: String
     
     // Initialize the missile
-    init(owner: String, position: Vector? = nil, heading: Vector? = nil, team: Int = Config.Team.NoTeam) {
+    init(owner: String, position: Vector? = nil, heading: Vector? = nil, team: Int = Config.Team.NoTeam, userControlled: Bool = false) {
         // Make sure we know who fired the missile so it doesn't cause an SD
         self.missileOwner = owner
         
@@ -51,7 +51,7 @@ class Missile: MovingObject {
         radius = (missileNode.size.width + missileNode.size.height) / 4
         
         // Set the name for this instance and for the sprite node
-        name = self.missileOwner + "." + getUniqueName()
+        name = getUniqueName()
         missileNode.name = name
         
         // Initialize the physics body used for collision detection

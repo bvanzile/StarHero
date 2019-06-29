@@ -24,6 +24,9 @@ class BaseObject: Equatable {
     var team: Int = Config.Team.NoTeam
     var attackable: Bool = false
     
+    // User controls
+    var userControlled: Bool = false
+    
     // Position (x, y) and the direction this object is facing in clockwise degrees
     var position: Vector = Vector()
     var heading: Vector = Vector(x: 1.0, y: 0.0)
@@ -31,7 +34,7 @@ class BaseObject: Equatable {
     var radius: CGFloat = 0.0
     
     // Default initializer
-    init(position: Vector? = nil, heading: Vector? = nil, team: Int = Config.Team.NoTeam) {
+    init(position: Vector? = nil, heading: Vector? = nil, team: Int = Config.Team.NoTeam, userControlled: Bool = false) {
         // Update the position if default is given - unwrap
         if let pos = position {
             self.position = pos
@@ -52,6 +55,9 @@ class BaseObject: Equatable {
         else {
             self.team = team
         }
+        
+        // Set user controlled flag
+        self.userControlled = userControlled
     }
     
     // Get a unique name for the object, this method should always be overwritten
@@ -89,19 +95,19 @@ class BaseObject: Equatable {
     }
     
     ///////
-    /////// STUBS FOR ALL OBJECT SUB CLASS TO INHERIT
+    /////// Stub classes for base classes to inherit if needed
     ///////
     func getNode() -> SKNode { return baseNode }
-    func update(dTime: TimeInterval) -> Bool { return false }   // Update the object
-    func handleCollision(_ object: BaseObject?) { }             // Handle a collision with the passed through object
-    func handleStopColliding(_ object: BaseObject?) { }         // Handle when a collision ends
-    func seeObject(_ object: BaseObject?) { }                   // Handle collision of sight box with an object
-    func loseSightOnObject(_ object: BaseObject?) { }           // Handle losing collision on sight box with an object
-    func objectInPeripheralRange(_ object: BaseObject?) { }     // Handle collision of peripheral sight box contacting with an object
-    func objectOutOfPeripheralRange(_ object: BaseObject?) { }  // Handle losing collision of peripheral sight box with an object
-    func inputTouchDown(touchPos: CGPoint) { }                  // Handle the different inputs from the game screen
-    func inputTouchUp(touchPos: CGPoint) { }                    // Handle the different inputs from the game screen
-    func inputTouchMoved(touchPos: CGPoint) { }                 // Handle the different inputs from the game screen
+    func update(dTime: TimeInterval) -> Bool { return false }       // Update the object
+    func handleCollision(_ object: BaseObject?) { }                 // Handle a collision with the passed through object
+    func handleStopColliding(_ object: BaseObject?) { }             // Handle when a collision ends
+    func seeObject(_ object: BaseObject?) { }                       // Handle collision of sight box with an object
+    func loseSightOnObject(_ object: BaseObject?) { }               // Handle losing collision on sight box with an object
+    func objectInPeripheralRange(_ object: BaseObject?) { }         // Handle collision of peripheral sight box contacting with an object
+    func objectOutOfPeripheralRange(_ object: BaseObject?) { }      // Handle losing collision of peripheral sight box with an object
+    func inputTouchDown(touchPos: CGPoint) -> Bool { return false } // Handle the different inputs from the game screen
+    func inputTouchUp(touchPos: CGPoint) -> Bool { return false }   // Handle the different inputs from the game screen
+    func inputTouchMoved(touchPos: CGPoint) -> Bool { return false }// Handle the different inputs from the game screen
     
     // Compare two base objects to see if they are the same
     static func == (lhs: BaseObject, rhs: BaseObject) -> Bool {

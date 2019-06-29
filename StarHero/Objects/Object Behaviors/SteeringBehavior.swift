@@ -16,6 +16,7 @@ enum SteeringBehaviors {
     case Flee
     case Wander
     case Pursue
+    case FollowPath
     case Idle
 }
 
@@ -26,17 +27,11 @@ class SteeringBehavior {
     // The current active steering behavior
     private var activeSteeringBehavior: SteeringBehaviors = SteeringBehaviors.Idle
     
-    // Radius of how far we are detecting things to avoid
-    var avoidanceRadius: CGFloat = 0.0
-    
     // Target vector
     var targetPosition: Vector = Vector()
     
     // Just stores the heading to return to after dodging
     var returnHeading: Vector?
-    
-    // For pursuing
-    var pursuedTarget: MovingObject? = nil
     
     // Constants used for wandering behavior
     private var wanderCircle: Vector = Vector()
@@ -44,10 +39,16 @@ class SteeringBehavior {
     private let wanderRadius: CGFloat = 20.0
     private let wanderDistance: CGFloat = 0.0
     
+    // For pursuing
+    var pursuedTarget: MovingObject? = nil
+    
+    // Path to follow, received from user input
+    var followPath: [CGPoint] = [CGPoint]()
+    var followAccuracy: CGFloat = 1.0
+    
     // Initializer
-    init(object: MovingObject, avoidanceRadius: CGFloat = 0.0) {
+    init(object: MovingObject) {
         self.owner = object
-        self.avoidanceRadius = avoidanceRadius
     }
     
     // Set the current behavior and target
@@ -76,6 +77,11 @@ class SteeringBehavior {
     func setToPursue(target: MovingObject) {
         activeSteeringBehavior = SteeringBehaviors.Pursue
         pursuedTarget = target
+    }
+    func setToFollowPath(path: [CGPoint], accuracy: CGFloat = 1.0) {
+        activeSteeringBehavior = SteeringBehaviors.FollowPath
+        followPath = path
+        followAccuracy = accuracy
     }
     func setToIdle() { activeSteeringBehavior = SteeringBehaviors.Idle }
     
@@ -147,6 +153,10 @@ class SteeringBehavior {
             
         case .Pursue:
             desiredVelocity = pursue()
+            break
+            
+        case .FollowPath:
+            desiredVelocity = follow()
             break
             
         case .Idle: // .Idle
@@ -253,6 +263,24 @@ class SteeringBehavior {
             let lookAheadTime = (distanceToTarget).length() / Config.MissileMaxSpeed //((movingObject.maxSpeed + target.velocity.length()) * 1)
             
             return seek(target: target.position + (target.velocity * lookAheadTime))
+        }
+        
+        return Vector()
+    }
+    
+    private func follow() -> Vector {
+        if !followPath.isEmpty {
+            // Iterate through the path, reversed so we can get rid of some elements
+            for (key, point) in followPath.enumerated().reversed() {
+                // Seek toward the first point that isn't too close
+                if owner.position.distanceBetween(vector: Vector(point)) > owner.radius * followAccuracy {
+                    return seek(target: Vector(point))
+                }
+                else {
+                    // Get rid of this point since it is too close
+                    followPath.remove(at: key)
+                }
+            }
         }
         
         return Vector()

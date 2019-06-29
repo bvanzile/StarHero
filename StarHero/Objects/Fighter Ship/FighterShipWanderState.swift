@@ -41,7 +41,7 @@ class FighterShipWanderState: State {
     // Function for updating a state
     func execute(object: BaseObject, dTime: TimeInterval) {
         if let fighterShip = object as? FighterShip {
-            // Change the ship to wander if the velocity returns false (velocity was set to 0 for some reason)
+            // Update the fightership
             fighterShip.updateVelocity(timeElapsed: dTime)
             fighterShip.updatePosition(timeElapsed: dTime)
             fighterShip.updateNode()

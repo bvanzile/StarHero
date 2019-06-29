@@ -17,6 +17,7 @@ class FighterShipMoveState: State {
     
     // Function for entering into a state
     func enter(object: BaseObject) {
+        print("Entering movement state")
         if let fighterShip = object as? FighterShip {
             // Set the velocity to the ship's heading if it is currently not moving so that it doesn't turn around instantly
             if(fighterShip.velocity.length() == 0) {
@@ -27,8 +28,8 @@ class FighterShipMoveState: State {
     
     // Function for exiting a state
     func exit(object: BaseObject) {
+        print("Exiting movement state")
         if let _ = object as? FighterShip {
-            
         }
     }
     
@@ -39,8 +40,9 @@ class FighterShipMoveState: State {
             fighterShip.updatePosition(timeElapsed: dTime)
             fighterShip.updateNode()
             
-            if(fighterShip.position.distanceBetween(vector: fighterShip.steeringBehavior!.targetPosition) < 5) {
-                fighterShip.stateMachine?.changeState(newState: FighterShipWanderState.sharedInstance)
+            print("State follow path array: \(fighterShip.steeringBehavior!.followPath.count)")
+            if fighterShip.steeringBehavior!.followPath.isEmpty {
+                fighterShip.stateMachine!.changeState(newState: FighterShipWanderState.sharedInstance)
             }
         }
     }

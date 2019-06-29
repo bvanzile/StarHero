@@ -64,15 +64,15 @@ struct Config {
     
     // Fighter ship physics configurations
     static let MotherShipMass: CGFloat = 200            // Weight of the ship for movement physics
-    static let MotherShipMaxSpeed: CGFloat = 20         // Units/second
+    static let MotherShipMaxSpeed: CGFloat = 45         // Units/second
     static let MotherShipTakeoffSpeed: CGFloat = 1      // Units/second
-    static let MotherShipMaxForce: CGFloat = 150        // For acceleration/turn rate
+    static let MotherShipMaxForce: CGFloat = 200        // For acceleration/turn rate
     static let MotherShipDeceleration: CGFloat = 0.5    // Rate of deceleration for an arrival, higher is faster
     
     // Mothership actions
     static let MotherShipSpawnCooldown: Double = 8.0    // How long between fighter ship spawns
     static let MotherShipInitialSpawn: Int = 4          // How many fighters spawn at the start
-    static let MotherShipBoundaryLength: CGFloat = 1000
+    static let MotherShipBoundaryLength: CGFloat = 750
     
     // Sprite image locations - Fightership
     static let FighterShipLocation: String = "FighterShipEmpty"

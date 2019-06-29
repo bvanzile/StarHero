@@ -39,6 +39,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         physicsWorld.contactDelegate = self
     }
     
+    
     func touchDown(atPoint pos : CGPoint) {
         print("Touched screen at \(Int(pos.x)), \(Int(pos.y))")
         
@@ -46,9 +47,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         var touchedNodeNames = [String]()
         for n in touchedNode {
             if let myNode = n.name {
-                if !myNode.contains(".Peripheral") && !myNode.contains(".Sight") {
+                if myNode.contains(".Touch") {
                     print("Touched: \(myNode)")
-                    touchedNodeNames.append(myNode)
+                    touchedNodeNames.append(myNode.components(separatedBy: ".")[0])
                 }
                 
                 // Pause button overrides everything
@@ -71,13 +72,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func touchMoved(toPoint pos : CGPoint) {
+       
         // Pass the along the position that the screen was touched
         ObjectManager.sharedInstance.screenTouched(pos: pos, touchType: Config.TouchMoved)
     }
     
     func touchUp(atPoint pos : CGPoint) {
+        let touchedNode = self.nodes(at: pos)
+        var touchedNodeNames = [String]()
+        for n in touchedNode {
+            if let myNode = n.name {
+                if myNode.contains(".Touch") {
+                    print("Touched up on: \(myNode)")
+                    touchedNodeNames.append(myNode.components(separatedBy: ".")[0])
+                }
+            }
+        }
         // Pass the along the position that the screen was touched
-        ObjectManager.sharedInstance.screenTouched(pos: pos, touchType: Config.TouchUp)
+        ObjectManager.sharedInstance.screenTouched(pos: pos, touchType: Config.TouchUp, touchedNodes: touchedNodeNames)
     }
     
     // Some contact was detected between two game physics objects

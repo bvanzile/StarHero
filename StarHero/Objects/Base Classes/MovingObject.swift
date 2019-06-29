@@ -30,8 +30,8 @@ class MovingObject: BaseObject, VectorMath {
     var boundaryDistance: CGFloat? = nil
     
     // Initializer
-    override init(position: Vector? = nil, heading: Vector? = nil, team: Int = Config.Team.NoTeam) {
-        super.init(position: position, heading: heading, team: team)
+    override init(position: Vector? = nil, heading: Vector? = nil, team: Int = Config.Team.NoTeam, userControlled: Bool = false) {
+        super.init(position: position, heading: heading, team: team, userControlled: userControlled)
         
         steeringBehavior = SteeringBehavior(object: self)
     }
@@ -55,18 +55,17 @@ class MovingObject: BaseObject, VectorMath {
             heading = velocity.normalize()
             side = heading.right()
         }
-        else {
-            print("Zero velocity")
-        }
     }
     
     // Update the node with the current heading and position
-    func updateNode() {
+    func updateNode(ignoreHeading: Bool = false) {
         // Simply apply the position to the node
         self.getNode().position = CGPoint(x: position.x, y: position.y)
         
         // Convert from x,y coordinates that start at the right to one that starts at the top
-        self.getNode().zRotation = heading.toRads() - degreesToRads(degrees: 90)
+        if !ignoreHeading {
+            self.getNode().zRotation = heading.toRads() - degreesToRads(degrees: 90)
+        }
     }
     
     // Setup the boundary for this object
@@ -75,12 +74,18 @@ class MovingObject: BaseObject, VectorMath {
         boundaryDistance = distance
     }
     
+    // Remove the boundary for this object
+    func removeBoundary() {
+        boundaryOrigin = nil
+        boundaryDistance = nil
+    }
+    
     // Check whether this object is within the boundaries
     func isOutOfBounds(scale: CGFloat = 1.0) -> Bool {
         // Check if the ship has moved out of bounds and change the state to return
         //if((position.x * position.x) > ((Config.FieldWidth / 2) * (Config.FieldWidth / 2) * scale) || (position.y * position.y) > ((Config.FieldHeight / 2) * (Config.FieldHeight / 2)) * scale) {
         if let origin = boundaryOrigin, let distance = boundaryDistance {
-            if (position - Vector(point: origin.position)).length() > distance {
+            if (position - Vector(origin.position)).length() > distance {
                 return true
             }
         }

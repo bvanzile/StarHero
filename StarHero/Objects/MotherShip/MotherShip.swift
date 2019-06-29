@@ -9,9 +9,7 @@
 import Foundation
 import SpriteKit
 
-class MotherShip: MovingObject, ObjectPeripheralSight {
-    
-    
+class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
     // Sprite for motherships
     private let motherShipNode = SKSpriteNode(imageNamed: Config.MotherShipLocation)
     private var shieldNode: SKShapeNode? = nil
@@ -19,19 +17,26 @@ class MotherShip: MovingObject, ObjectPeripheralSight {
     // All of the fighter ships this mothership owns
     var fighterShips: [FighterShip] = [FighterShip]()
     
-    // The peripheral vision of the mothership
+    // Stubs from ObjectPeripheralSight: The peripheral vision of the mothership
     var peripheralNode: SKShapeNode = SKShapeNode()
     var objectsInPeripheral: [String : MovingObject] = [String : MovingObject]()
     
-    // The mothership state machine
+    // Stubs from ObjectTouchControls: The node for initializing touch controls for this object
+    var touchNode: SKShapeNode?
+    var line: SKShapeNode?
+    var path: CGMutablePath?
+    var lastTouchPos: CGPoint?
+    var points: [CGPoint] = [CGPoint]()
+    
+    // The mothership state machine and steering behavior
     var stateMachine: StateMachine?
     
     // Cooldown before we can spawn a new fightership
     var spawningCooldown: Double = Config.MotherShipSpawnCooldown
     
     // Initialize the mother ship
-    override init(position: Vector? = nil, heading: Vector? = nil, team: Int = Config.Team.NoTeam) {
-        super.init(position: position, heading: heading, team: team)
+    override init(position: Vector? = nil, heading: Vector? = nil, team: Int = Config.Team.NoTeam, userControlled: Bool = false) {
+        super.init(position: position, heading: heading, team: team, userControlled: userControlled)
         
         // Get all of the default fighter ship physics properties
         mass = Config.MotherShipMass
@@ -56,7 +61,8 @@ class MotherShip: MovingObject, ObjectPeripheralSight {
         
         // Set the name for this instance and for the sprite node
         name = getUniqueName()
-        motherShipNode.name = name
+        baseNode.name = name! + ".Base"
+        motherShipNode.name = name! + ".Sprite"
         
         let oneRevolution: SKAction = SKAction.rotate(byAngle: CGFloat.pi * 2, duration: 20)
         let repeatRotation: SKAction = SKAction.repeatForever(oneRevolution)
@@ -100,8 +106,18 @@ class MotherShip: MovingObject, ObjectPeripheralSight {
         
         setupPeripheralPhysicsBody(radius: Config.MotherShipBoundaryLength, canSee: Config.BitMaskCategory.MotherShip)
         
+        // Add the peripheral boundary node to the greater scene
         ObjectManager.sharedInstance.addNode(node: peripheralNode)
+        
+        // Setup the boundary reference for this mother ship
         setBoundary(origin: peripheralNode, distance: Config.MotherShipBoundaryLength)
+        
+        // Setup the touch control node
+        touchNode = SKShapeNode(circleOfRadius: self.radius)
+        touchNode!.name = self.name! + ".Touch"
+        setupTouchNode()
+        
+        baseNode.addChild(touchNode!)
         
         // Scale at the end
         motherShipNode.setScale(Config.MotherShipScale)
@@ -118,6 +134,7 @@ class MotherShip: MovingObject, ObjectPeripheralSight {
         
         // Initialize the state machine
         stateMachine = StateMachine(object: self)
+        stateMachine!.changeState(newState: MotherShipIdleState.sharedInstance)
         
         // Spawn 4 fighter ships off the start
         for _ in 0..<Config.MotherShipInitialSpawn {
@@ -132,6 +149,7 @@ class MotherShip: MovingObject, ObjectPeripheralSight {
         let spawnToward = direction ?? position.reverse()
         let fighterShip = FighterShip(position: position, heading: spawnToward, team: team)
         fighterShip.setBoundary(origin: boundaryOrigin!, distance: Config.MotherShipBoundaryLength)
+        fighterShip.userControlled = self.userControlled
         
         fighterShips.append(fighterShip)
         
@@ -174,11 +192,6 @@ class MotherShip: MovingObject, ObjectPeripheralSight {
                 print("\(self.name!) sees \(name)")
                 objectsInPeripheral[name] = motherShip
                 
-                // Keep track of enemies separately so we can dodge them
-                if motherShip.team != self.team {
-                    objectsToAvoid[name] = motherShip
-                }
-                
                 // Move the boundary since a new mothership is in the fray
                 moveBoundary()
             }
@@ -191,7 +204,6 @@ class MotherShip: MovingObject, ObjectPeripheralSight {
             if let name = motherShip.name {
                 // Just try to remove it
                 objectsInPeripheral.removeValue(forKey: name)
-                objectsToAvoid.removeValue(forKey: name)
                 
                 // Move the boundary since a new mothership is in the fray
                 moveBoundary()
@@ -215,7 +227,7 @@ class MotherShip: MovingObject, ObjectPeripheralSight {
         newY = newY / CGFloat(count)
         
         // Move the boundary to the new position
-        let moveAction = SKAction.move(to: CGPoint(x: newX, y: newY), duration: 2.0)
+        let moveAction = SKAction.move(to: CGPoint(x: newX, y: newY), duration: 1.0)
         peripheralNode.run(moveAction)
     }
     
@@ -253,34 +265,91 @@ class MotherShip: MovingObject, ObjectPeripheralSight {
         for (key, object) in objectsInPeripheral {
             if !object.isActive {
                 objectsInPeripheral.removeValue(forKey: key)
-                
-                // If we no longer see a mothership, move the boundary again
-                if let _ = object as? MotherShip {
-                    moveBoundary()
-                }
             }
         }
         
-        // Clean up the objects to avoid
-        for (key, object) in objectsToAvoid {
-            if !object.isActive {
-                objectsToAvoid.removeValue(forKey: key)
-            }
-        }
+        // Update the boundary position
+        moveBoundary()
         
-        // Update the fighter ship with the current state
+        // Update the mothership with the current state
         stateMachine?.update(dTime: dTime)
         
         return true
     }
     
-    override func inputTouchDown(touchPos: CGPoint) {
-        destroy()
-        //spawnFighterShip()
+    override func inputTouchDown(touchPos: CGPoint) -> Bool {
+        if userControlled {
+            // Pause the game while user actions are taking place
+            ObjectManager.sharedInstance.pause()
+            
+            // End the path
+            releasePathNode()
+            
+            // Setup the line node
+            line = SKShapeNode()
+            path = CGMutablePath()
+            line!.strokeColor = .gray
+            line!.alpha = 0.5
+            line!.lineWidth = 4
+            
+            // Start drawing the line if necessary
+            if position.distanceBetween(vector: Vector(touchPos)) > radius * 1.25 {
+                drawPath(pos: touchPos)
+            }
+            
+            // Add this node to the scene
+            ObjectManager.sharedInstance.addNode(node: line!)
+            ObjectManager.sharedInstance.activeObject = self
+            
+            return true
+        }
+        
+        return false
+    }
+    
+    override func inputTouchMoved(touchPos: CGPoint) -> Bool {
+        if userControlled {
+            // Start drawing the line when necessary
+            if position.distanceBetween(vector: Vector(touchPos)) > radius * 1.25 {
+                drawPath(pos: touchPos)
+                points.append(touchPos)
+            }
+            
+            return true
+        }
+        
+        return false
+    }
+    
+    override func inputTouchUp(touchPos: CGPoint) -> Bool {
+        if userControlled && ObjectManager.sharedInstance.activeObject == self {
+            // Unpause the game, as the move action is completed
+            ObjectManager.sharedInstance.unpause()
+            
+            // Setup the steering behavior with the path array
+            steeringBehavior!.setToFollowPath(path: points.reversed(), accuracy: 0.25)
+            points.removeAll()
+            
+            // Change into the moving state
+            stateMachine?.changeState(newState: MotherShipMoveState.sharedInstance)
+            
+            // Release self as active object
+            ObjectManager.sharedInstance.activeObject = nil
+            
+            return true
+        }
+        
+        return false
     }
     
     override func destroy() {
         peripheralNode.removeFromParent()
+        
+        // Remove the boundary for all of these fighter ships so they can be free
+        for fighterShip in fighterShips {
+            fighterShip.removeBoundary()
+        }
+        
         super.destroy()
     }
 }
