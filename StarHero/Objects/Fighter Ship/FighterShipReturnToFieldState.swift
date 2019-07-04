@@ -19,7 +19,7 @@ class FighterShipReturnToFieldState: State {
     func enter(object: BaseObject) {
         if let fighterShip = object as? FighterShip {
             // End the existing path if it is ongoing
-            fighterShip.releasePathNode(10000.0)
+            fighterShip.releasePathNode()
             
             fighterShip.steeringBehavior?.setToSeek(target: Vector(fighterShip.boundaryOrigin!.position))
         }

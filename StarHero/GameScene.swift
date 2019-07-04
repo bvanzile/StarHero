@@ -13,15 +13,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // The pause button
     private var pauseButton: SKShapeNode?
     
+    // For zooming on the scene
+    var previousCameraScale: CGFloat = 1.0
+    
     override func didMove(to view: SKView) {
         print("didMove")
-        
+    
         // Update the configuration file with accurate game screen field dimensions
         Config.updateFieldDimenstions(fieldWidth: self.size.width, fieldHieght: self.size.height)
         
         // Set up the object manager for this game scene
         ObjectManager.sharedInstance.setup(scene: self)
         ObjectManager.sharedInstance.newGame()
+        
+        let pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(self.handlePinchFrom(_:)))
+        self.view?.addGestureRecognizer(pinchGesture)
         
         // Get the pause button and store it for later
         pauseButton = childNode(withName: "//pauseButton") as? SKShapeNode
@@ -30,7 +36,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             pauseButton.zPosition = Config.RenderPriority.TopLevelMenu
             
             // Move the pause button to the camera node so it stays on screen
-            pauseButton.move(toParent: ObjectManager.sharedInstance.gameCamera.getNode())
+            pauseButton.move(toParent: ObjectManager.sharedInstance.camera.getNode())
             
             print("Inititialized pause button")
         }
@@ -39,6 +45,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         physicsWorld.contactDelegate = self
     }
     
+    @objc func handlePinchFrom(_ sender: UIPinchGestureRecognizer) {
+        if sender.state == .began {
+            ObjectManager.sharedInstance.startCameraScale()
+        }
+        else if sender.state == .changed {
+            ObjectManager.sharedInstance.scaleCamera(scale: sender.scale)
+        }
+        else if sender.state == .ended {
+            
+        }
+    }
     
     func touchDown(atPoint pos : CGPoint) {
         print("Touched screen at \(Int(pos.x)), \(Int(pos.y))")
@@ -72,7 +89,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func touchMoved(toPoint pos : CGPoint) {
-       
         // Pass the along the position that the screen was touched
         ObjectManager.sharedInstance.screenTouched(pos: pos, touchType: Config.TouchMoved)
     }

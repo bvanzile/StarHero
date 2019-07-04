@@ -40,7 +40,6 @@ class FighterShipMoveState: State {
             fighterShip.updatePosition(timeElapsed: dTime)
             fighterShip.updateNode()
             
-            print("State follow path array: \(fighterShip.steeringBehavior!.followPath.count)")
             if fighterShip.steeringBehavior!.followPath.isEmpty {
                 fighterShip.stateMachine!.changeState(newState: FighterShipWanderState.sharedInstance)
             }

@@ -28,13 +28,16 @@ class ObjectManager {
     private var endedContactQueue = [SKPhysicsContact]()
     
     // The game scene camera
-    var gameCamera: Camera = Camera()
+    var camera: Camera = Camera()
     
     // Determines if the game field is frozen
     var scenePaused: Bool = false
     
-    // An object that is currently being updated in some way
+    // An object that is currently being updated in some way through touch controls
     var activeObject: BaseObject?
+    
+    // For storing touch length
+    var touchStarted: Date?
     
     // Initializer
     private init() {
@@ -43,8 +46,8 @@ class ObjectManager {
     // Setup the scene with objects
     func setup(scene: GameScene) {
         self.gameScene = scene
-        gameScene!.camera = gameCamera.getNode()
-        gameScene!.addChild(gameCamera.getNode())
+        gameScene!.camera = camera.getNode()
+        gameScene!.addChild(camera.getNode())
         
         // Only add background image to devices since it lags the emulator currently
         #if !targetEnvironment(simulator)
@@ -60,15 +63,28 @@ class ObjectManager {
         let redShip = MotherShip(position: Vector(x: 0, y: -Config.FieldHeight * 3 / 8), heading: Vector(degrees: 90.0), team: Config.Team.RedTeam, userControlled: true)
         let blueShip = MotherShip(position: Vector(x: 0, y: Config.FieldHeight * 3 / 8), heading: Vector(degrees: 270.0), team: Config.Team.BlueTeam)
         
-        objects[redShip.name!] = redShip
-        objects[blueShip.name!] = blueShip
+        addObject(object: redShip)
+        addObject(object: blueShip)
         
-        for (_, object) in objects {
-            if let n = object.addToScene() {
-                gameScene?.addChild(n)
-            }
+        let minW = Config.FieldWidth * 0.7
+        let minH = Config.FieldHeight * 0.7
+        
+        let asteroids = [
+            Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80)),
+            Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80)),
+            Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80)),
+            Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80)),
+            Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80)),
+            Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80)),
+            Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80)),
+            Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80)),
+            Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80)),
+            Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80))
+        ]
+        
+        for asteroid in asteroids {
+            addObject(object: asteroid)
         }
-        
     }
     
     // Completely tear down the existing game
@@ -102,7 +118,7 @@ class ObjectManager {
         }
         
         // Update the game camera
-        gameCamera.update(time: timeDelta)
+        camera.update(time: timeDelta)
     }
     
     // Callback for any function to use to add an object and node to the game scene
@@ -142,6 +158,16 @@ class ObjectManager {
         }
     }
     
+    // Start the scaling for the camera
+    func startCameraScale() {
+        camera.startScale()
+    }
+    
+    // Handles zoom from the pinch gesture
+    func scaleCamera(scale: CGFloat) {
+        camera.setScale(scale)
+    }
+    
     // Called when the screen is touched
     func screenTouched(pos: CGPoint, touchType: Int, touchedNodes: [String] = [String]()) {
         // Iterate through objects with touch input (TODO: change team hierarchy when more is implemented)
@@ -149,58 +175,54 @@ class ObjectManager {
             
         // Screen was touched down at pos
         case Config.TouchDown:
-            // Check if a node was touched and give it the action
-            var validTouchMade: Bool = false
-            if !touchedNodes.isEmpty {
-                for name in touchedNodes {
-                    // Take action if the pause button was pressed
-                    if(name == "pauseButton") {
-//                        teardown()
-//                        newGame()
-                        if scenePaused {
-                            unpause()
-                        }
-                        else {
-                            pause()
-                        }
-                        
-                        validTouchMade = true
+            // Start the touch started timer
+            touchStarted = Date()
+            
+            // Get the closest valid object to touch if it exists
+            if let closest = getClosestTouchObject(pos: pos, nodes: touchedNodes) {
+                // Take action if the pause button was pressed
+                if(closest == "pauseButton") {
+                    if scenePaused {
+                        unpause()
                     }
                     else {
-                        if !scenePaused {
-                            if let returnValue = objects[name]?.inputTouchDown(touchPos: pos) {
-                                if returnValue {
-                                    validTouchMade = true
-                                }
-                            }
-                        }
+                        pause()
+                    }
+                }
+                else {
+                    if !scenePaused {
+                        let _ = objects[closest]?.inputTouchDown(touchPos: pos)
                     }
                 }
             }
-            
             // Move the camera around if no other valid inputs were made
-            if !validTouchMade {
-                gameCamera.startMoving(pos)
+            else {
+                camera.startMoving(pos)
             }
             break
             
         // Touch was stopped at pos
         case Config.TouchUp:
-//            if !touchedNodes.isEmpty {
-//                for name in touchedNodes {
-//                    if !scenePaused {
-//                        if let _ = objects[name]?.inputTouchUp(touchPos: pos) {
-//                        }
-//                    }
-//                }
-//            }
-            
             // Update the active object if one exists
-            if let object = activeObject {
-                let _ = object.inputTouchUp(touchPos: pos)
+            if let elapsedTimeSinceTouch = touchStarted?.timeIntervalSinceNow {
+                // Check for if something was tapped down on initially
+                if let object = activeObject {
+                    // Check if it was tapped
+                    if elapsedTimeSinceTouch > -0.1 {
+                        let _ = object.inputTapped()
+                    }
+                    
+                    let _ = object.inputTouchUp(touchPos: pos)
+                }
+                // Check if there was a tap on the screen
+                else if elapsedTimeSinceTouch > -0.1 {
+                    let asteroid = Asteroid(position: Vector(pos), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80))
+                    addObject(object: asteroid)
+                }
             }
             
-            gameCamera.stopMoving()
+            camera.stopMoving()
+            touchStarted = nil
             break
             
         // Touch is moving, currently at pos
@@ -210,7 +232,7 @@ class ObjectManager {
                 let _ = object.inputTouchMoved(touchPos: pos)
             }
             
-            gameCamera.movingInput(pos)
+            camera.movingInput(pos)
             break
             
         default:
@@ -218,6 +240,37 @@ class ObjectManager {
             print("No input type, shouldn't be called")
             break
         }
+    }
+    
+    // Get the closest user controlled object to the touch position
+    func getClosestTouchObject(pos: CGPoint, nodes: [String]) -> String? {
+        // Check if a node was touched and give it the action
+        var closestObject: String?
+        
+        if !nodes.isEmpty {
+            for name in nodes {
+                // Take action if the pause button was pressed
+                if(name == "pauseButton") {
+                    return name
+                }
+                else {
+                    if let object = objects[name] {
+                        if object.userControlled {
+                            if closestObject == nil {
+                                closestObject = name
+                            }
+                            else {
+                                if object.position.distanceBetween(vector: Vector(pos)) < objects[closestObject!]!.position.distanceBetween(vector: Vector(pos)) {
+                                    closestObject = name
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return closestObject
     }
     
     // Process all of the contacts in the queue and perform the necessary interactions

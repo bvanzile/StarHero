@@ -60,11 +60,11 @@ class MovingObject: BaseObject, VectorMath {
     // Update the node with the current heading and position
     func updateNode(ignoreHeading: Bool = false) {
         // Simply apply the position to the node
-        self.getNode().position = CGPoint(x: position.x, y: position.y)
+        getNode().position = CGPoint(x: position.x, y: position.y)
         
         // Convert from x,y coordinates that start at the right to one that starts at the top
         if !ignoreHeading {
-            self.getNode().zRotation = heading.toRads() - degreesToRads(degrees: 90)
+            getNode().zRotation = heading.toRads() - degreesToRads(degrees: 90)
         }
     }
     

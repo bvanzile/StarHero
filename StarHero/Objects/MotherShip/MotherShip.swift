@@ -32,11 +32,18 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
     var stateMachine: StateMachine?
     
     // Cooldown before we can spawn a new fightership
-    var spawningCooldown: Double = Config.MotherShipSpawnCooldown
+    private var spawningCooldown: Double = Config.MotherShipSpawnCooldown
+    
+    // Node for labels to attach to
+    private var labelNode: SKNode = SKNode()
+    
+    // Energy motherships need
+    private var energy: Int = 100
+    private var energyLabel: SKLabelNode = SKLabelNode(fontNamed: "HelveticaNeue")
     
     // Initialize the mother ship
     override init(position: Vector? = nil, heading: Vector? = nil, team: Int = Config.Team.NoTeam, userControlled: Bool = false) {
-        super.init(position: position, heading: heading, team: team, userControlled: userControlled)
+        super.init(position: position, heading: Vector(x: 0, y: 1), team: team, userControlled: userControlled)
         
         // Get all of the default fighter ship physics properties
         mass = Config.MotherShipMass
@@ -44,9 +51,6 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
         takeoffSpeed = Config.MotherShipTakeoffSpeed
         maxForce = Config.MotherShipMaxForce
         deceleration = Config.MotherShipDeceleration
-        
-        // Set the node's position and heading
-        self.updateNode()
         
         //Set the team color
         motherShipNode.color = Config.getTeamColor(team: self.team)
@@ -71,11 +75,11 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
         
         // Initialize the physics body used for collision detection
         motherShipNode.physicsBody = SKPhysicsBody(circleOfRadius: radius)
-        motherShipNode.physicsBody?.isDynamic = true
-        motherShipNode.physicsBody?.affectedByGravity = false
-        motherShipNode.physicsBody?.categoryBitMask = Config.BitMaskCategory.MotherShip
-        motherShipNode.physicsBody?.contactTestBitMask = 0x0
-        motherShipNode.physicsBody?.collisionBitMask = 0x0
+        motherShipNode.physicsBody!.isDynamic = true
+        motherShipNode.physicsBody!.affectedByGravity = false
+        motherShipNode.physicsBody!.categoryBitMask = Config.BitMaskCategory.MotherShip
+        motherShipNode.physicsBody!.contactTestBitMask = Config.BitMaskCategory.Resource
+        motherShipNode.physicsBody!.collisionBitMask = 0x0
         
         shieldNode = SKShapeNode(circleOfRadius: radius * 1.1)
         shieldNode!.lineWidth = 2.0
@@ -119,6 +123,18 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
         
         baseNode.addChild(touchNode!)
         
+        // Setup the energy monitor
+        energyLabel.text = "Energy: \(energy)"
+        energyLabel.horizontalAlignmentMode = .left
+        energyLabel.fontSize = 20
+        energyLabel.position = CGPoint(x: -energyLabel.frame.maxX / 2, y: radius * 1.6)
+        energyLabel.fontColor = SKColor.white
+        
+        baseNode.addChild(energyLabel)
+        
+        // Set the node's position and heading
+        updateNode()
+        
         // Scale at the end
         motherShipNode.setScale(Config.MotherShipScale)
         
@@ -146,7 +162,13 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
     
     // Spawn a fighter ship
     func spawnFighterShip(direction: Vector? = nil) {
-        let spawnToward = direction ?? position.reverse()
+        // Aim it at the closest enemy if they exist
+        var spawnHeading: Vector?
+        if let closest = closestEnemy() {
+            spawnHeading = (closest.position - position).normalize()
+        }
+        
+        let spawnToward = direction ?? spawnHeading ?? Vector(degrees: CGFloat.random(in: 0...360))
         let fighterShip = FighterShip(position: position, heading: spawnToward, team: team)
         fighterShip.setBoundary(origin: boundaryOrigin!, distance: Config.MotherShipBoundaryLength)
         fighterShip.userControlled = self.userControlled
@@ -182,6 +204,11 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
                 }
             }
         }
+        // Check if contacted with a resource
+        else if let _ = object as? Resource {
+            // Collect the resource
+            energy += 25
+        }
     }
     
     // A ship enters the peripheral range of this fighter ship
@@ -211,6 +238,29 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
         }
     }
     
+    // Get the closest enemy mothership in range
+    func closestEnemy() -> MotherShip? {
+        var closest: MotherShip?
+        
+        // Look for the closest mothership
+        for (_, objInPeripheral) in self.objectsInPeripheral {
+            if let motherShip = objInPeripheral as? MotherShip {
+                if motherShip.isActive {
+                    if closest == nil {
+                        closest = motherShip
+                    }
+                    else {
+                        if((closest!.position - position).length() > (motherShip.position - position).length()) {
+                            closest = motherShip
+                        }
+                    }
+                }
+            }
+        }
+        
+        return closest
+    }
+    
     // Move boundary
     func moveBoundary() {
         // Move to the average position of all motherships
@@ -227,7 +277,7 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
         newY = newY / CGFloat(count)
         
         // Move the boundary to the new position
-        let moveAction = SKAction.move(to: CGPoint(x: newX, y: newY), duration: 1.0)
+        let moveAction = SKAction.move(to: CGPoint(x: newX, y: newY), duration: 0.5)
         peripheralNode.run(moveAction)
     }
     
@@ -271,6 +321,9 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
         // Update the boundary position
         moveBoundary()
         
+        // Update the energy label
+        energyLabel.text = "Energy: \(energy)"
+        
         // Update the mothership with the current state
         stateMachine?.update(dTime: dTime)
         
@@ -288,7 +341,7 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
             // Setup the line node
             line = SKShapeNode()
             path = CGMutablePath()
-            line!.strokeColor = .gray
+            line!.strokeColor = .lightGray
             line!.alpha = 0.5
             line!.lineWidth = 4
             
@@ -327,7 +380,7 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
             ObjectManager.sharedInstance.unpause()
             
             // Setup the steering behavior with the path array
-            steeringBehavior!.setToFollowPath(path: points.reversed(), accuracy: 0.25)
+            steeringBehavior!.setToFollowPath(path: points.reversed(), accuracy: 1.25)
             points.removeAll()
             
             // Change into the moving state
@@ -343,11 +396,14 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
     }
     
     override func destroy() {
-        peripheralNode.removeFromParent()
-        
-        // Remove the boundary for all of these fighter ships so they can be free
-        for fighterShip in fighterShips {
-            fighterShip.removeBoundary()
+        if isActive {
+            peripheralNode.removeFromParent()
+            releasePathNode()
+            
+            // Remove the boundary for all of these fighter ships so they can be free
+            for fighterShip in fighterShips {
+                fighterShip.removeBoundary()
+            }
         }
         
         super.destroy()

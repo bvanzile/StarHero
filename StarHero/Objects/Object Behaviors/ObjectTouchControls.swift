@@ -59,8 +59,16 @@ extension ObjectTouchControls {
     }
     
     // Drawn line is released based on a velocity
-    func releasePathNode() {
-        line?.run(SKAction.fadeOut(withDuration: 0.5))
+    func releasePathNode(invalidPath: Bool = true) {
+        if let line = self.line {
+            if line.alpha > 0.1 {
+                if invalidPath {
+                    line.strokeColor = .red
+                    line.alpha = 0.2
+                }
+                line.run(SKAction.fadeOut(withDuration: 0.5))
+            }
+        }
     }
     
     // Add arrow

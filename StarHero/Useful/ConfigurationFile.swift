@@ -52,6 +52,8 @@ struct Config {
         static let Sight: UInt32 = 0x1 << 4
         static let Peripheral: UInt32 = 0x1 << 5
         static let Missile: UInt32 = 0x1 << 6
+        static let Asteroid: UInt32 = 0x1 << 7
+        static let Resource: UInt32 = 0x1 << 8
         static let All: UInt32 = UInt32.max
     }
     
@@ -64,7 +66,7 @@ struct Config {
     
     // Fighter ship physics configurations
     static let MotherShipMass: CGFloat = 200            // Weight of the ship for movement physics
-    static let MotherShipMaxSpeed: CGFloat = 45         // Units/second
+    static let MotherShipMaxSpeed: CGFloat = 60         // Units/second
     static let MotherShipTakeoffSpeed: CGFloat = 1      // Units/second
     static let MotherShipMaxForce: CGFloat = 200        // For acceleration/turn rate
     static let MotherShipDeceleration: CGFloat = 0.5    // Rate of deceleration for an arrival, higher is faster
@@ -84,6 +86,8 @@ struct Config {
     static let FighterShipTakeoffSpeed: CGFloat = 5      // Units/second
     static let FighterShipMaxForce: CGFloat = 85         // For acceleration/turn rate
     static let FighterShipDeceleration: CGFloat = 0.8    // Rate of deceleration for an arrival, higher is faster
+    
+    // Fighter ship sight and peripheral constants
     static let FighterShipSightDistance: CGFloat = 325    // 325  1100
     static let FighterShipSightFOV: CGFloat = 100
     static let FighterShipPeripheralRadius: CGFloat = 60      // 60
@@ -103,6 +107,28 @@ struct Config {
     static let MissileTakeoffSpeed: CGFloat = 0.0
     static let MissileMaxForce: CGFloat = 100
     static let MissileDeceleration: CGFloat = 0.1
+    
+    // Asteroid constants
+    static let AsteroidLocation: String = "Asteroid"
+    static let AsteroidScale: CGFloat = 0.4
+    
+    // Asteroid physics
+    static let AsteroidMass: CGFloat = 80
+    static let AsteroidMaxSpeed: CGFloat = 100
+    static let AsteroidTakeoffSpeed: CGFloat = 0.0
+    static let AsteroidMaxForce: CGFloat = 100
+    static let AsteroidDeceleration: CGFloat = 0.1
+    
+    // Resource constants
+    static let ResourceLocation: String = "Energy"
+    static let ResourceScale: CGFloat = 0.3
+    
+    // Resource physics
+    static let ResourceMass: CGFloat = 10
+    static let ResourceMaxSpeed: CGFloat = 100
+    static let ResourceTakeoffSpeed: CGFloat = 0.0
+    static let ResourceMaxForce: CGFloat = 100
+    static let ResourceDeceleration: CGFloat = 0.1
     
     // Explosion constants
     static let InitialExplosions: Int = 10

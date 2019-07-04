@@ -19,7 +19,6 @@ class FighterShipIdleState: State {
     func enter(object: BaseObject) {
         if let fighterShip = object as? FighterShip {
             fighterShip.steeringBehavior?.setToIdle()
-            fighterShip.velocity = Vector()
         }
     }
     

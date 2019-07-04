@@ -31,9 +31,6 @@ class Missile: MovingObject {
         maxForce = Config.MissileMaxForce
         deceleration = Config.MissileDeceleration
         
-        // Set the node's position and heading
-        self.updateNode()
-        
         //Set the team color
         missileNode.setScale(Config.MissileScale)
         if(team != Config.Team.NoTeam)
@@ -61,6 +58,9 @@ class Missile: MovingObject {
         missileNode.physicsBody?.categoryBitMask = Config.BitMaskCategory.Missile
         missileNode.physicsBody?.contactTestBitMask = Config.BitMaskCategory.Missile + Config.BitMaskCategory.FighterShip + Config.BitMaskCategory.MotherShip
         missileNode.physicsBody?.collisionBitMask = 0x0
+        
+        // Set the node's position and heading
+        updateNode()
         
         // Setup the missile's steering behavior, go in the direction it was facing when created
         steeringBehavior?.setToGo(direction: self.heading)
@@ -106,6 +106,12 @@ class Missile: MovingObject {
         }
         // Check if collided with a mothership
         else if let _ = object as? MotherShip {
+            // Create an explosion where the mothership was hit
+            ObjectManager.sharedInstance.addObject(object: Explosion(position: position, size: self.radius * 3, duration: 0.3, force: heading * self.radius * 8))
+            destroy()
+        }
+        // Check if collided with an asteroid
+        else if let _ = object as? Asteroid {
             // Create an explosion where the mothership was hit
             ObjectManager.sharedInstance.addObject(object: Explosion(position: position, size: self.radius * 3, duration: 0.3, force: heading * self.radius * 8))
             destroy()

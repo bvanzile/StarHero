@@ -40,7 +40,7 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight, ObjectTouc
     var missileLaunchSide: Int = Int.random(in: 0...1)
     
     let debugging: Bool = false
-    var debugText: SKLabelNode = SKLabelNode(text: "test")
+    let debugText: SKLabelNode = SKLabelNode(text: "0")
     
     // The fighter ship state machine
     var stateMachine: StateMachine?
@@ -55,9 +55,6 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight, ObjectTouc
         takeoffSpeed = Config.FighterShipTakeoffSpeed
         maxForce = Config.FighterShipMaxForce
         deceleration = Config.FighterShipDeceleration
-        
-        // Set the node's position and heading
-        self.updateNode()
         
         //Set the team color
         fighterShipNode.setScale(Config.FighterShipScale)
@@ -86,7 +83,7 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight, ObjectTouc
         sightNode.position = CGPoint(x: 0, y: radius + 0.01)
         sightNode.isHidden = true
         sightNode.name = self.name! + ".Sight"
-        setupSightPhysicsBody(degrees: Config.FighterShipSightFOV, distance: Config.FighterShipSightDistance, canSee: Config.BitMaskCategory.FighterShip + Config.BitMaskCategory.Missile + Config.BitMaskCategory.MotherShip)
+        setupSightPhysicsBody(degrees: Config.FighterShipSightFOV, distance: Config.FighterShipSightDistance, canSee: Config.BitMaskCategory.FighterShip + Config.BitMaskCategory.Missile + Config.BitMaskCategory.MotherShip + Config.BitMaskCategory.Asteroid)
         
         // Add the sight node to the base node
         baseNode.addChild(sightNode)
@@ -95,7 +92,7 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight, ObjectTouc
         peripheralNode.position = CGPoint(x: 0, y: Config.FighterShipPeripheralRadius / 2)
         peripheralNode.isHidden = true
         peripheralNode.name = self.name! + ".Peripheral"
-        setupPeripheralPhysicsBody(radius: Config.FighterShipPeripheralRadius, canSee: Config.BitMaskCategory.FighterShip + Config.BitMaskCategory.MotherShip)
+        setupPeripheralPhysicsBody(radius: Config.FighterShipPeripheralRadius, canSee: Config.BitMaskCategory.FighterShip + Config.BitMaskCategory.MotherShip + Config.BitMaskCategory.Asteroid)
         
         // Add the peripheral node to the fighter ship
         baseNode.addChild(peripheralNode)
@@ -114,16 +111,19 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight, ObjectTouc
 //        effectNode.addChild(SKSpriteNode(texture: fighterShipNode.texture))
 //        effectNode.filter = CIFilter(name: "CIGaussianBlur", parameters: ["inputRadius": 30])
         
-        debugText.fontSize = 25
-        debugText.position = CGPoint(x: 0, y: -50)
-        debugText.fontColor = SKColor.yellow
-        debugText.text = "0"
         if debugging {
+            debugText.fontSize = 25
+            debugText.position = CGPoint(x: 0, y: -50)
+            debugText.fontColor = SKColor.yellow
+            
             baseNode.addChild(debugText)
         }
         
         // Add the fighter ship to the base node
         baseNode.addChild(fighterShipNode)
+        
+        // Set the node's position and heading
+        updateNode()
         
         // Initialize the state machine
         stateMachine = StateMachine(object: self)
@@ -338,6 +338,15 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight, ObjectTouc
                 canAttack = false
             }
         }
+        // Check if it ran into an asteroid somehow
+        else if let asteroid = object as? Asteroid {
+            // Determine the force behind the explosion and then explode
+            let force = ((velocity * mass) + (asteroid.velocity * asteroid.mass)).normalize()
+            explode(sizeScale: 1.15, force: force, forceFactor: 2.5)
+            
+            // If this is someone else's missile, destroy this ship
+            destroy()
+        }
     }
     
     // Handle a collision with an object
@@ -399,6 +408,12 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight, ObjectTouc
                 }
             }
         }
+        else if let spottedAsteroid = object as? Asteroid {
+            // Add the new spotted ship to the list
+            if let name = spottedAsteroid.name {
+                objectsInSight[name] = spottedAsteroid
+            }
+        }
     }
     
     // Target moves out of sight
@@ -435,19 +450,21 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight, ObjectTouc
                 }
             }
         }
+        else if let asteroid = object as? Asteroid {
+            // Add the new spotted ship to the list
+            if let name = asteroid.name {
+                objectsInPeripheral[name] = asteroid
+                
+                // Keep track of enemies separately so we can dodge them
+                objectsToAvoid[name] = asteroid
+            }
+        }
     }
     
     // A ship leaves this ship's peripheral range
     override func objectOutOfPeripheralRange(_ object: BaseObject?) {
-        if let fighterShip = object as? FighterShip {
-            if let name = fighterShip.name {
-                // Just try to remove it
-                objectsInPeripheral.removeValue(forKey: name)
-                objectsToAvoid.removeValue(forKey: name)
-            }
-        }
-        else if let motherShip = object as? MotherShip {
-            if let name = motherShip.name {
+        if let movingObject = object as? MovingObject {
+            if let name = movingObject.name {
                 // Just try to remove it
                 objectsInPeripheral.removeValue(forKey: name)
                 objectsToAvoid.removeValue(forKey: name)
@@ -493,7 +510,7 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight, ObjectTouc
             stateMachine?.changeState(newState: FighterShipReturnToFieldState.sharedInstance)
         }
         
-        debugText.text = "\(objectsToAvoid.count)"
+        debugText.text = "\(objectsInSight.count)"
         
         // Update the fighter ship with the current state
         stateMachine?.update(dTime: dTime)
@@ -518,7 +535,7 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight, ObjectTouc
             
             // Setup the line node
             line = SKShapeNode()
-            line!.strokeColor = .gray
+            line!.strokeColor = .lightGray
             line!.alpha = 0.5
             line!.lineWidth = 4
             
@@ -557,17 +574,26 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight, ObjectTouc
             // Unpause the game, as the move action is completed
             ObjectManager.sharedInstance.unpause()
             
-            // End the path
-            addArrow()
-            releasePathNode(maxSpeed)
+            if points.count > 0 {
+                // Check if the path is too short to even follow and get rid of it immediately
+                if getPathLength(points) < radius * 2 && position.distanceBetween(vector: Vector(points.last!)) < radius {
+                    releasePathNode()
+                }
+                else {
+                    // End the path
+                    addArrow()
+                    releasePathNode(maxSpeed)
+                    
+                    // Setup the steering behavior with the path array
+                    steeringBehavior!.setToFollowPath(path: points.reversed(), accuracy: 2.0)
+                    points.removeAll()
+                    
+                    // Change into the moving state
+                    stateMachine?.changeState(newState: FighterShipMoveState.sharedInstance)
+                }
+            }
+            
             lastTouchPos = nil
-            
-            // Setup the steering behavior with the path array
-            steeringBehavior!.setToFollowPath(path: points.reversed(), accuracy: 2.0)
-            points.removeAll()
-            
-            // Change into the moving state
-            stateMachine?.changeState(newState: FighterShipMoveState.sharedInstance)
             
             // Release self as active object
             ObjectManager.sharedInstance.activeObject = nil
@@ -576,5 +602,13 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight, ObjectTouc
         }
         
         return false
+    }
+    
+    override func destroy() {
+        if isActive {
+            releasePathNode()
+        }
+            
+        super.destroy()
     }
 }

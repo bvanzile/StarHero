@@ -18,6 +18,12 @@ class Camera {
     private var isMoving: Bool = false
     private var lastTouchDown: CGPoint? = nil
     
+    // For scaling
+    private let minScale: CGFloat = 0.75
+    private let maxScale: CGFloat = 2.0
+    private var currentScale: CGFloat = 1.0
+    private var lastScale: CGFloat = 1.0
+    
     init(_ start: CGPoint? = nil) {
         if let startingPoint = start {
             cameraNode.position = startingPoint
@@ -59,7 +65,11 @@ class Camera {
     
     // Start camera movement
     func startMoving(_ touchDownPosition: CGPoint) {
-        if isMoving { print("startMoving called: Camera was already moving, this should never happen") }
+        // This implies two touchdowns which means probable pinch gesture
+        if isMoving {
+            stopMoving()
+            return
+        }
         
         // Capture where the touch down occurred so we can capture the delta
         lastTouchDown = touchDownPosition
@@ -72,6 +82,24 @@ class Camera {
         lastTouchDown = nil
         
         isMoving = false
+    }
+    
+    // Start scaling the camera
+    func startScale() {
+        lastScale = 1.0
+    }
+    
+    // Scale the camera
+    func setScale(_ scale: CGFloat) {
+        let scaleDelta = (lastScale - scale) / 2
+        currentScale += scaleDelta
+        
+        if currentScale > maxScale { currentScale = maxScale }
+        else if currentScale < minScale { currentScale = minScale }
+        
+        cameraNode.setScale(currentScale)
+        
+        lastScale = scale
     }
     
     // Get the camera

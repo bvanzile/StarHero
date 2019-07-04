@@ -30,7 +30,7 @@ class Explosion: BaseObject, VectorMath {
         super.init(position: position)
         
         explosionOrigin.position = position.toCGPoint()
-        explosionOrigin.zPosition = Config.RenderPriority.GameFront
+        explosionOrigin.zPosition = Config.RenderPriority.GameFront + 0.1
         
         self.duration = duration ?? self.duration
         self.force = force ?? self.force

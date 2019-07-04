@@ -18,6 +18,9 @@ class FighterShipDodgeState: State {
     // Function for entering into a state
     func enter(object: BaseObject) {
         if let fighterShip = object as? FighterShip {
+            // Cancel the movement
+            fighterShip.releasePathNode()
+            
             // If the steering behavior wasn't set then we have to cancel moving into this state and go back to wandering
             if fighterShip.steeringBehavior?.getActiveBehavior() != SteeringBehaviors.Go {
                 print("Failed to go in the direction")

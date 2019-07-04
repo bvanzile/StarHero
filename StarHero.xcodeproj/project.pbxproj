@@ -40,6 +40,10 @@
 		4693C12422C565390043D08C /* ObjectTouchControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4693C12322C565390043D08C /* ObjectTouchControls.swift */; };
 		4693C12622C6BE6C0043D08C /* MotherShipIdleState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4693C12522C6BE6C0043D08C /* MotherShipIdleState.swift */; };
 		4693C12822C6BE860043D08C /* MotherShipMoveState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4693C12722C6BE860043D08C /* MotherShipMoveState.swift */; };
+		4693C12B22C7EF160043D08C /* Energy.png in Resources */ = {isa = PBXBuildFile; fileRef = 4693C12922C7EF160043D08C /* Energy.png */; };
+		4693C12C22C7EF160043D08C /* Asteroid.png in Resources */ = {isa = PBXBuildFile; fileRef = 4693C12A22C7EF160043D08C /* Asteroid.png */; };
+		4693C12E22C7EFA10043D08C /* Asteroid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4693C12D22C7EFA10043D08C /* Asteroid.swift */; };
+		4693C13122CD66640043D08C /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4693C13022CD66640043D08C /* Resource.swift */; };
 		46B94D7B229B6A45004DAC49 /* FighterShipTurnToLookState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46B94D7A229B6A45004DAC49 /* FighterShipTurnToLookState.swift */; };
 		46B94D7D229B9043004DAC49 /* FighterShipDodgeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46B94D7C229B9043004DAC49 /* FighterShipDodgeState.swift */; };
 		46EBC27F229364A800CBF2F6 /* VectorMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEFAE229362C10082E062 /* VectorMath.swift */; };
@@ -115,6 +119,10 @@
 		4693C12322C565390043D08C /* ObjectTouchControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectTouchControls.swift; sourceTree = "<group>"; };
 		4693C12522C6BE6C0043D08C /* MotherShipIdleState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotherShipIdleState.swift; sourceTree = "<group>"; };
 		4693C12722C6BE860043D08C /* MotherShipMoveState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotherShipMoveState.swift; sourceTree = "<group>"; };
+		4693C12922C7EF160043D08C /* Energy.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Energy.png; sourceTree = "<group>"; };
+		4693C12A22C7EF160043D08C /* Asteroid.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Asteroid.png; sourceTree = "<group>"; };
+		4693C12D22C7EFA10043D08C /* Asteroid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Asteroid.swift; sourceTree = "<group>"; };
+		4693C13022CD66640043D08C /* Resource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
 		46B94D7A229B6A45004DAC49 /* FighterShipTurnToLookState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FighterShipTurnToLookState.swift; sourceTree = "<group>"; };
 		46B94D7C229B9043004DAC49 /* FighterShipDodgeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FighterShipDodgeState.swift; sourceTree = "<group>"; };
 		46EBC2BA2294870F00CBF2F6 /* SteeringBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SteeringBehavior.swift; sourceTree = "<group>"; };
@@ -255,6 +263,8 @@
 				465CEFA52291BB8B0082E062 /* State Machine */,
 				4693C12222B1A1A40043D08C /* Camera */,
 				465CBD5E22A83C2100CBB560 /* Explosion */,
+				4693C12F22C7EFAE0043D08C /* Asteroid */,
+				4693C13222CD66890043D08C /* Resource */,
 				46EBC2CA2297083000CBF2F6 /* Missile */,
 				465CEFA42291B6770082E062 /* Fighter Ship */,
 				465CBD7322AADEE200CBB560 /* MotherShip */,
@@ -268,6 +278,8 @@
 		465CEF8E228F1AAC0082E062 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				4693C12A22C7EF160043D08C /* Asteroid.png */,
+				4693C12922C7EF160043D08C /* Energy.png */,
 				4664D13922AC711E00CFC4C6 /* Background.png */,
 				4664D13722AC63E200CFC4C6 /* MissilePlain.png */,
 				465CBD6D22AADE9C00CBB560 /* MotherShip1.png */,
@@ -323,6 +335,22 @@
 				4693C12022B1A1930043D08C /* Camera.swift */,
 			);
 			path = Camera;
+			sourceTree = "<group>";
+		};
+		4693C12F22C7EFAE0043D08C /* Asteroid */ = {
+			isa = PBXGroup;
+			children = (
+				4693C12D22C7EFA10043D08C /* Asteroid.swift */,
+			);
+			path = Asteroid;
+			sourceTree = "<group>";
+		};
+		4693C13222CD66890043D08C /* Resource */ = {
+			isa = PBXGroup;
+			children = (
+				4693C13022CD66640043D08C /* Resource.swift */,
+			);
+			path = Resource;
 			sourceTree = "<group>";
 		};
 		46EBC2CA2297083000CBF2F6 /* Missile */ = {
@@ -449,7 +477,9 @@
 				4664D13A22AC711E00CFC4C6 /* Background.png in Resources */,
 				465CEF5F2283A2720082E062 /* Main.storyboard in Resources */,
 				465CBD6522AAD36C00CBB560 /* FighterEmpty.png in Resources */,
+				4693C12C22C7EF160043D08C /* Asteroid.png in Resources */,
 				465CBD6F22AADE9C00CBB560 /* MotherShip3.png in Resources */,
+				4693C12B22C7EF160043D08C /* Energy.png in Resources */,
 				465CEF612283A2750082E062 /* Assets.xcassets in Resources */,
 				4664D13822AC63E200CFC4C6 /* MissilePlain.png in Resources */,
 				465CEF642283A2750082E062 /* LaunchScreen.storyboard in Resources */,
@@ -481,6 +511,7 @@
 				465CEF96228F638E0082E062 /* ConfigurationFile.swift in Sources */,
 				46B94D7B229B6A45004DAC49 /* FighterShipTurnToLookState.swift in Sources */,
 				46EBC2D4229A237400CBF2F6 /* GameScene.swift in Sources */,
+				4693C13122CD66640043D08C /* Resource.swift in Sources */,
 				46EBC2D0229851C400CBF2F6 /* FighterShipAttackState.swift in Sources */,
 				46EBC2BD22948D9400CBF2F6 /* FighterShipIdleState.swift in Sources */,
 				46EBC2D222985DCF00CBF2F6 /* ObjectCanSee.swift in Sources */,
@@ -497,6 +528,7 @@
 				465CEF9C228F775F0082E062 /* MovingObject.swift in Sources */,
 				46EBC2CE22970D8A00CBF2F6 /* Missile.swift in Sources */,
 				4693C12422C565390043D08C /* ObjectTouchControls.swift in Sources */,
+				4693C12E22C7EFA10043D08C /* Asteroid.swift in Sources */,
 				465CBD6222A997FB00CBB560 /* ObjectPeripheralSight.swift in Sources */,
 				465CBD6022A83C2E00CBB560 /* Explosion.swift in Sources */,
 				465CEF542283A2720082E062 /* AppDelegate.swift in Sources */,

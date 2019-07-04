@@ -160,7 +160,8 @@ class SteeringBehavior {
             break
             
         case .Idle: // .Idle
-            return desiredVelocity
+            desiredVelocity = owner.velocity.reverse()
+            break
         }
         
         // Return the steering force vector

@@ -21,10 +21,9 @@ class MotherShipIdleState: State {
             print("MotherShip entering idle state")
             
             // End the path, if one is ongoing
-            motherShip.releasePathNode()
+            motherShip.releasePathNode(invalidPath: false)
             
             motherShip.steeringBehavior?.setToIdle()
-            motherShip.velocity = Vector()
         }
     }
     
@@ -41,6 +40,10 @@ class MotherShipIdleState: State {
             motherShip.updateVelocity(timeElapsed: dTime)
             motherShip.updatePosition(timeElapsed: dTime)
             motherShip.updateNode(ignoreHeading: true)
+            
+            if motherShip.velocity.length() < 5 {
+                motherShip.velocity = Vector()
+            }
         }
     }
 }
