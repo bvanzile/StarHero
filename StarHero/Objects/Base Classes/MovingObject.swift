@@ -89,6 +89,13 @@ class MovingObject: BaseObject, VectorMath {
                 return true
             }
         }
+        else if position.x > Config.MaxFieldWidth * 0.6 || position.x < -Config.MaxFieldWidth * 0.6 {
+            return true
+        }
+        else if position.y > Config.MaxFieldHeight * 0.6 || position.y < -Config.MaxFieldHeight * 0.6 {
+            return true
+        }
+        
         return false
     }
 }

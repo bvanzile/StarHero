@@ -65,8 +65,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         for n in touchedNode {
             if let myNode = n.name {
                 if myNode.contains(".Touch") {
-                    print("Touched: \(myNode)")
-                    touchedNodeNames.append(myNode.components(separatedBy: ".")[0])
+                    //print("Touched: \(myNode)")
+                    touchedNodeNames.append(myNode)
                 }
                 
                 // Pause button overrides everything
@@ -99,8 +99,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         for n in touchedNode {
             if let myNode = n.name {
                 if myNode.contains(".Touch") {
-                    print("Touched up on: \(myNode)")
-                    touchedNodeNames.append(myNode.components(separatedBy: ".")[0])
+                    touchedNodeNames.append(myNode)
+                }
+                else if myNode.contains(".Button.") {
+                    touchedNodeNames.append(myNode)
                 }
             }
         }

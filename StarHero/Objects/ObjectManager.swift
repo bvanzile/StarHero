@@ -22,6 +22,7 @@ class ObjectManager {
     // All game objects
     private var objects: [String: BaseObject] = [String: BaseObject]()
     private var extraNodes: [SKNode] = [SKNode]()
+    private var asteroidSpawnTimer: Double = 0.0
     
     // A queue to manage contact physics from the game scene
     private var newContactQueue = [SKPhysicsContact]()
@@ -29,6 +30,9 @@ class ObjectManager {
     
     // The game scene camera
     var camera: Camera = Camera()
+    
+    // Background
+    var background: Background?
     
     // Determines if the game field is frozen
     var scenePaused: Bool = false
@@ -51,39 +55,34 @@ class ObjectManager {
         
         // Only add background image to devices since it lags the emulator currently
         #if !targetEnvironment(simulator)
-            let background = SKSpriteNode(imageNamed: "Background")
-            background.zPosition = Config.RenderPriority.GameBackground
-            gameScene?.addChild(background)
-        
+            // Setup the background images
+            background = Background(scene: gameScene!, fieldWidth: Config.MaxFieldWidth * 1.1, fieldHeight: Config.MaxFieldHeight * 1.3)
+            camera.background = background
+            camera.optimizeBackground()
+//            let background = SKSpriteNode(imageNamed: "Background")
+//            background.zPosition = Config.RenderPriority.GameBackground
+//            gameScene?.addChild(background)
         #endif
+        
+        
     }
     
     // Setup a game from scratch
     func newGame() {
-        let redShip = MotherShip(position: Vector(x: 0, y: -Config.FieldHeight * 3 / 8), heading: Vector(degrees: 90.0), team: Config.Team.RedTeam, userControlled: true)
-        let blueShip = MotherShip(position: Vector(x: 0, y: Config.FieldHeight * 3 / 8), heading: Vector(degrees: 270.0), team: Config.Team.BlueTeam)
+        let minW = Config.MaxFieldWidth * 0.5
+        let minH = Config.MaxFieldHeight * 0.5
         
-        addObject(object: redShip)
-        addObject(object: blueShip)
+        // Player controlled ship
+        addObject(object: MotherShip(position: Vector(x: 0, y: 0), heading: Vector(degrees: 90.0), team: Config.Team.RedTeam, userControlled: true))
         
-        let minW = Config.FieldWidth * 0.7
-        let minH = Config.FieldHeight * 0.7
+        // Computer teams
+        addObject(object: MotherShip(position: Vector(x: CGFloat.random(in: -(minW * 0.9)...(minW * 0.9)), y: CGFloat.random(in: -(minH * 0.9)...(minH * 0.9))), team: Config.Team.BlueTeam))
+        addObject(object: MotherShip(position: Vector(x: CGFloat.random(in: -(minW * 0.9)...(minW * 0.9)), y: CGFloat.random(in: -(minH * 0.9)...(minH * 0.9))), team: Config.Team.OrangeTeam))
+        addObject(object: MotherShip(position: Vector(x: CGFloat.random(in: -(minW * 0.9)...(minW * 0.9)), y: CGFloat.random(in: -(minH * 0.9)...(minH * 0.9))), team: Config.Team.GreenTeam))
+        //addObject(object: MotherShip(position: Vector(x: CGFloat.random(in: -(minW * 0.9)...(minW * 0.9)), y: CGFloat.random(in: -(minH * 0.9)...(minH * 0.9))), team: Config.Team.RedTeam))
         
-        let asteroids = [
-            Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80)),
-            Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80)),
-            Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80)),
-            Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80)),
-            Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80)),
-            Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80)),
-            Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80)),
-            Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80)),
-            Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80)),
-            Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80))
-        ]
-        
-        for asteroid in asteroids {
-            addObject(object: asteroid)
+        for _ in 0...50 {
+            addObject(object: Asteroid(position: Vector(x: CGFloat.random(in: -minW...minW), y: CGFloat.random(in: -minH...minH)), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 30...120)))
         }
     }
     
@@ -111,6 +110,14 @@ class ObjectManager {
                     // Remove and destroy the object if false is returned from the update function
                     removeObject(key)
                 }
+            }
+            
+            // Spawn random asteroids
+            asteroidSpawnTimer += timeDelta
+            if asteroidSpawnTimer > 1.0 {
+                asteroidSpawnTimer -= 1.0
+                
+                addObject(object: Asteroid(position: Vector(x: CGFloat.random(in: -(Config.MaxFieldWidth * 0.5)...(Config.MaxFieldWidth * 0.5)), y: CGFloat.random(in: -(Config.MaxFieldHeight * 0.5)...(Config.MaxFieldHeight * 0.5))), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 30...120)))
             }
             
             // Remove extra nodes that no longer exist, have to do our own cleanup
@@ -170,6 +177,10 @@ class ObjectManager {
     
     // Called when the screen is touched
     func screenTouched(pos: CGPoint, touchType: Int, touchedNodes: [String] = [String]()) {
+        for name in touchedNodes {
+            print(name)
+        }
+        
         // Iterate through objects with touch input (TODO: change team hierarchy when more is implemented)
         switch touchType {
             
@@ -181,17 +192,19 @@ class ObjectManager {
             // Get the closest valid object to touch if it exists
             if let closest = getClosestTouchObject(pos: pos, nodes: touchedNodes) {
                 // Take action if the pause button was pressed
-                if(closest == "pauseButton") {
-                    if scenePaused {
-                        unpause()
-                    }
-                    else {
-                        pause()
-                    }
+                if closest == "pauseButton" && activeObject == nil {
+//                    if scenePaused {
+//                        unpause()
+//                    }
+//                    else {
+//                        pause()
+//                    }
+                    teardown()
+                    newGame()
                 }
-                else {
+                else if closest.contains(".Touch") {
                     if !scenePaused {
-                        let _ = objects[closest]?.inputTouchDown(touchPos: pos)
+                        let _ = objects[closest.components(separatedBy: ".")[0]]?.inputTouchDown(touchPos: pos)
                     }
                 }
             }
@@ -208,16 +221,23 @@ class ObjectManager {
                 // Check for if something was tapped down on initially
                 if let object = activeObject {
                     // Check if it was tapped
-                    if elapsedTimeSinceTouch > -0.1 {
-                        let _ = object.inputTapped()
+                    if elapsedTimeSinceTouch > -0.2 {
+                        if let closest = getClosestTouchObject(pos: pos, nodes: touchedNodes) {
+                            if closest.contains(".Button.") {
+                                let _ = object.buttonTouched(name: closest.components(separatedBy: ".")[2])
+                            }
+                        }
+                        
+                        let _ = object.inputTapped(touchPos: pos)
                     }
-                    
-                    let _ = object.inputTouchUp(touchPos: pos)
+                    else {
+                        let _ = object.inputTouchUp(touchPos: pos)
+                    }
                 }
                 // Check if there was a tap on the screen
-                else if elapsedTimeSinceTouch > -0.1 {
-                    let asteroid = Asteroid(position: Vector(pos), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80))
-                    addObject(object: asteroid)
+                else if elapsedTimeSinceTouch > -0.2 {
+//                    let asteroid = Asteroid(position: Vector(pos), heading: Vector(degrees: CGFloat.random(in: 0...360)), speed: CGFloat.random(in: 10...80))
+//                    addObject(object: asteroid)
                 }
             }
             
@@ -242,7 +262,7 @@ class ObjectManager {
         }
     }
     
-    // Get the closest user controlled object to the touch position
+    // Get the closest user controlled object to the touch position, prioritizing motherships
     func getClosestTouchObject(pos: CGPoint, nodes: [String]) -> String? {
         // Check if a node was touched and give it the action
         var closestObject: String?
@@ -250,18 +270,32 @@ class ObjectManager {
         if !nodes.isEmpty {
             for name in nodes {
                 // Take action if the pause button was pressed
-                if(name == "pauseButton") {
+                if name == "pauseButton" {
+                    return name
+                }
+                else if name.contains(".Button.") {
+                    // Prioritize a button press since it's in front
                     return name
                 }
                 else {
-                    if let object = objects[name] {
-                        if object.userControlled {
-                            if closestObject == nil {
-                                closestObject = name
-                            }
-                            else {
-                                if object.position.distanceBetween(vector: Vector(pos)) < objects[closestObject!]!.position.distanceBetween(vector: Vector(pos)) {
+                    // Iterate through the touch nodes to determine the closest one  myNode.components(separatedBy: ".")[0]
+                    if name.contains(".Touch") {
+                        let nodeName = name.components(separatedBy: ".")[0]
+                        
+                        if let object = objects[nodeName] {
+                            if object.userControlled {
+                                // Prioritize a user controlled mothership
+                                if nodeName.contains("MotherShip") {
+                                    return name
+                                }
+                                
+                                if closestObject == nil {
                                     closestObject = name
+                                }
+                                else {
+                                    if object.position.distanceBetween(vector: Vector(pos)) < objects[closestObject!.components(separatedBy: ".")[0]]!.position.distanceBetween(vector: Vector(pos)) {
+                                        closestObject = name
+                                    }
                                 }
                             }
                         }

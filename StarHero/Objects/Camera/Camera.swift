@@ -24,6 +24,9 @@ class Camera {
     private var currentScale: CGFloat = 1.0
     private var lastScale: CGFloat = 1.0
     
+    // Storing the background in the camera to optimize
+    var background: Background?
+    
     init(_ start: CGPoint? = nil) {
         if let startingPoint = start {
             cameraNode.position = startingPoint
@@ -55,12 +58,31 @@ class Camera {
         cameraNode.position.x += deltaMove.x
         cameraNode.position.y += deltaMove.y
         
+        let maxX = (Config.MaxFieldWidth / 2) - (Config.FieldWidth / 2)
+        let maxY = (Config.MaxFieldHeight / 2) - (Config.FieldHeight / 2)
+        
+        if cameraNode.position.x > maxX {
+            cameraNode.position.x = maxX
+        }
+        else if cameraNode.position.x < -maxX {
+            cameraNode.position.x = -maxX
+        }
+        
+        if cameraNode.position.y > maxY {
+            cameraNode.position.y = maxY
+        }
+        else if cameraNode.position.y < -maxY {
+            cameraNode.position.y = -maxY
+        }
+        
         // Update the last touched since we will now be touching somewhere else in the game view
         lastTouchDown?.x += deltaMove.x
         lastTouchDown?.y += deltaMove.y
         
         // Reset the delta since we used it
         deltaMove = Vector()
+        
+        optimizeBackground()
     }
     
     // Start camera movement
@@ -100,6 +122,22 @@ class Camera {
         cameraNode.setScale(currentScale)
         
         lastScale = scale
+        
+        optimizeBackground()
+    }
+    
+    // Draw background nodes that are visible
+    func optimizeBackground() {
+        if let bg = background {
+            for node in bg.backgroundNodes {
+                if cameraNode.contains(node) {
+                    node.isHidden = false
+                }
+                else {
+                    node.isHidden = true
+                }
+            }
+        }
     }
     
     // Get the camera

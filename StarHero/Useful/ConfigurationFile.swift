@@ -29,6 +29,8 @@ struct Config {
     // Field boundaries
     static var FieldWidth: CGFloat = 0.0
     static var FieldHeight: CGFloat = 0.0
+    static let MaxFieldWidth: CGFloat = 6500.0
+    static let MaxFieldHeight: CGFloat = 5000.0
     
     // Types of screen touches
     static let TouchUp: Int = 0

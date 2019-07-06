@@ -123,6 +123,13 @@ struct Vector: VectorMath {
         return (self - vector).length()
     }
     
+    // Rotate vector by degrees
+    func rotate(degrees: CGFloat) -> Vector {
+        let rotation = degreesToRads(degrees: degrees)
+        
+        return Vector(x: (x * cos(rotation)) - (y * sin(rotation)), y: (x * sin(rotation)) + (y * cos(rotation)))
+    }
+    
     // Convert vector to degrees
     func toRads() -> CGFloat {
         return atan2(y, x)

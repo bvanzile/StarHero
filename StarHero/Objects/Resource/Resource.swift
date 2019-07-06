@@ -13,6 +13,9 @@ class Resource: MovingObject {
     // The resource sprite
     private let resourceNode = SKSpriteNode(imageNamed: Config.ResourceLocation)
     
+    // Timer for how long this lasts before being destroyed
+    private var durationTimer: Double = 20.0
+    
     // Initialize the missile
     init(position: Vector? = nil, heading: Vector? = nil, speed: CGFloat = Config.ResourceMaxSpeed) {
         // Call the moving object and base class initializer
@@ -73,6 +76,11 @@ class Resource: MovingObject {
         updatePosition(timeElapsed: dTime)
         updateNode(ignoreHeading: true)
         
+        durationTimer -= dTime
+        if durationTimer < 0 {
+            destroy()
+        }
+        
         return true
     }
     
@@ -81,6 +89,11 @@ class Resource: MovingObject {
         // Check if collected by a mothership
         if let _ = object as? MotherShip {
             // Consumed by the mothership so we get destroyed
+            destroy()
+        }
+        // Check if collected by a fightership
+        if let _ = object as? FighterShip {
+            // Consumed by the fighter ship so we get destroyed
             destroy()
         }
     }

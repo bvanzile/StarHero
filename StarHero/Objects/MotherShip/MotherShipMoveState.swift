@@ -17,7 +17,7 @@ class MotherShipMoveState: State {
     
     // Function for entering into a state
     func enter(object: BaseObject) {
-        print("Entering movement state")
+        //print("Entering movement state")
         if let _ = object as? MotherShip {
             
         }
@@ -25,7 +25,7 @@ class MotherShipMoveState: State {
     
     // Function for exiting a state
     func exit(object: BaseObject) {
-        print("Exiting movement state")
+        //print("Exiting movement state")
         if let _ = object as? MotherShip {
         }
     }

@@ -108,7 +108,8 @@ class BaseObject: Equatable {
     func inputTouchDown(touchPos: CGPoint) -> Bool { return false } // Handle the different inputs from the game screen
     func inputTouchUp(touchPos: CGPoint) -> Bool { return false }   // Handle the different inputs from the game screen
     func inputTouchMoved(touchPos: CGPoint) -> Bool { return false }// Handle the different inputs from the game screen
-    func inputTapped() -> Bool { return false }                     // Handle the different inputs from the game screen
+    func inputTapped(touchPos: CGPoint) -> Bool { return false }    // Handle the different inputs from the game screen
+    func buttonTouched(name: String) -> Bool { return false }       // Handle a button touch, if necessary
     
     // Compare two base objects to see if they are the same
     static func == (lhs: BaseObject, rhs: BaseObject) -> Bool {

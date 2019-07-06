@@ -44,6 +44,11 @@
 		4693C12C22C7EF160043D08C /* Asteroid.png in Resources */ = {isa = PBXBuildFile; fileRef = 4693C12A22C7EF160043D08C /* Asteroid.png */; };
 		4693C12E22C7EFA10043D08C /* Asteroid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4693C12D22C7EFA10043D08C /* Asteroid.swift */; };
 		4693C13122CD66640043D08C /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4693C13022CD66640043D08C /* Resource.swift */; };
+		4693C13422CEC7C30043D08C /* PopupButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4693C13322CEC7C30043D08C /* PopupButtons.swift */; };
+		4693C13622CED0C90043D08C /* PopupFighterShip.png in Resources */ = {isa = PBXBuildFile; fileRef = 4693C13522CED0C90043D08C /* PopupFighterShip.png */; };
+		4693C13822D00E760043D08C /* ProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4693C13722D00E760043D08C /* ProgressBar.swift */; };
+		4693C13A22D02F640043D08C /* Background500.png in Resources */ = {isa = PBXBuildFile; fileRef = 4693C13922D02F640043D08C /* Background500.png */; };
+		4693C13C22D02F820043D08C /* Background.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4693C13B22D02F820043D08C /* Background.swift */; };
 		46B94D7B229B6A45004DAC49 /* FighterShipTurnToLookState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46B94D7A229B6A45004DAC49 /* FighterShipTurnToLookState.swift */; };
 		46B94D7D229B9043004DAC49 /* FighterShipDodgeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46B94D7C229B9043004DAC49 /* FighterShipDodgeState.swift */; };
 		46EBC27F229364A800CBF2F6 /* VectorMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465CEFAE229362C10082E062 /* VectorMath.swift */; };
@@ -123,6 +128,11 @@
 		4693C12A22C7EF160043D08C /* Asteroid.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Asteroid.png; sourceTree = "<group>"; };
 		4693C12D22C7EFA10043D08C /* Asteroid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Asteroid.swift; sourceTree = "<group>"; };
 		4693C13022CD66640043D08C /* Resource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
+		4693C13322CEC7C30043D08C /* PopupButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupButtons.swift; sourceTree = "<group>"; };
+		4693C13522CED0C90043D08C /* PopupFighterShip.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = PopupFighterShip.png; sourceTree = "<group>"; };
+		4693C13722D00E760043D08C /* ProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressBar.swift; sourceTree = "<group>"; };
+		4693C13922D02F640043D08C /* Background500.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Background500.png; sourceTree = "<group>"; };
+		4693C13B22D02F820043D08C /* Background.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Background.swift; sourceTree = "<group>"; };
 		46B94D7A229B6A45004DAC49 /* FighterShipTurnToLookState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FighterShipTurnToLookState.swift; sourceTree = "<group>"; };
 		46B94D7C229B9043004DAC49 /* FighterShipDodgeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FighterShipDodgeState.swift; sourceTree = "<group>"; };
 		46EBC2BA2294870F00CBF2F6 /* SteeringBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SteeringBehavior.swift; sourceTree = "<group>"; };
@@ -187,6 +197,8 @@
 				46EBC2D122985DCF00CBF2F6 /* ObjectCanSee.swift */,
 				465CBD6122A997FB00CBB560 /* ObjectPeripheralSight.swift */,
 				4693C12322C565390043D08C /* ObjectTouchControls.swift */,
+				4693C13322CEC7C30043D08C /* PopupButtons.swift */,
+				4693C13722D00E760043D08C /* ProgressBar.swift */,
 			);
 			path = "Object Behaviors";
 			sourceTree = "<group>";
@@ -278,6 +290,8 @@
 		465CEF8E228F1AAC0082E062 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				4693C13922D02F640043D08C /* Background500.png */,
+				4693C13522CED0C90043D08C /* PopupFighterShip.png */,
 				4693C12A22C7EF160043D08C /* Asteroid.png */,
 				4693C12922C7EF160043D08C /* Energy.png */,
 				4664D13922AC711E00CFC4C6 /* Background.png */,
@@ -333,6 +347,7 @@
 			isa = PBXGroup;
 			children = (
 				4693C12022B1A1930043D08C /* Camera.swift */,
+				4693C13B22D02F820043D08C /* Background.swift */,
 			);
 			path = Camera;
 			sourceTree = "<group>";
@@ -468,6 +483,7 @@
 				46EBC28522936A1A00CBF2F6 /* GameScene.sks in Resources */,
 				465CBD6A22AAD4CD00CBB560 /* FighterShipFilled.png in Resources */,
 				465CBD6922AAD4CD00CBB560 /* FighterShipEmpty.png in Resources */,
+				4693C13A22D02F640043D08C /* Background500.png in Resources */,
 				465CBD6E22AADE9C00CBB560 /* MotherShip2.png in Resources */,
 				465CBD6622AAD36C00CBB560 /* FighterFilled.png in Resources */,
 				465CEF98228F64660082E062 /* FighterShip.png in Resources */,
@@ -477,6 +493,7 @@
 				4664D13A22AC711E00CFC4C6 /* Background.png in Resources */,
 				465CEF5F2283A2720082E062 /* Main.storyboard in Resources */,
 				465CBD6522AAD36C00CBB560 /* FighterEmpty.png in Resources */,
+				4693C13622CED0C90043D08C /* PopupFighterShip.png in Resources */,
 				4693C12C22C7EF160043D08C /* Asteroid.png in Resources */,
 				465CBD6F22AADE9C00CBB560 /* MotherShip3.png in Resources */,
 				4693C12B22C7EF160043D08C /* Energy.png in Resources */,
@@ -519,6 +536,7 @@
 				465CEF88228F151A0082E062 /* BaseObject.swift in Sources */,
 				465CEFA72291BBAE0082E062 /* State.swift in Sources */,
 				465CEFA32290A94E0082E062 /* ObjectManager.swift in Sources */,
+				4693C13C22D02F820043D08C /* Background.swift in Sources */,
 				46EBC2BB2294870F00CBF2F6 /* SteeringBehavior.swift in Sources */,
 				46EBC27F229364A800CBF2F6 /* VectorMath.swift in Sources */,
 				465CEF5C2283A2720082E062 /* GameViewController.swift in Sources */,
@@ -530,9 +548,11 @@
 				4693C12422C565390043D08C /* ObjectTouchControls.swift in Sources */,
 				4693C12E22C7EFA10043D08C /* Asteroid.swift in Sources */,
 				465CBD6222A997FB00CBB560 /* ObjectPeripheralSight.swift in Sources */,
+				4693C13822D00E760043D08C /* ProgressBar.swift in Sources */,
 				465CBD6022A83C2E00CBB560 /* Explosion.swift in Sources */,
 				465CEF542283A2720082E062 /* AppDelegate.swift in Sources */,
 				4693C12122B1A1930043D08C /* Camera.swift in Sources */,
+				4693C13422CEC7C30043D08C /* PopupButtons.swift in Sources */,
 				4693C12822C6BE860043D08C /* MotherShipMoveState.swift in Sources */,
 				465CEF8B228F17590082E062 /* FighterShip.swift in Sources */,
 				465CEFAB2291E38B0082E062 /* FighterShipWanderState.swift in Sources */,

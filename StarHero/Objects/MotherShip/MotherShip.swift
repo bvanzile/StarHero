@@ -9,7 +9,11 @@
 import Foundation
 import SpriteKit
 
-class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
+struct MotherShipButton {
+    static let CreateFighterShip = "CreateFighterShip"
+}
+
+class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls, PopupButtons {
     // Sprite for motherships
     private let motherShipNode = SKSpriteNode(imageNamed: Config.MotherShipLocation)
     private var shieldNode: SKShapeNode? = nil
@@ -27,12 +31,14 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
     var path: CGMutablePath?
     var lastTouchPos: CGPoint?
     var points: [CGPoint] = [CGPoint]()
+    var touchHeld: Bool = false
     
     // The mothership state machine and steering behavior
     var stateMachine: StateMachine?
     
-    // Cooldown before we can spawn a new fightership
-    private var spawningCooldown: Double = Config.MotherShipSpawnCooldown
+    // Touch buttons that popup when pressed
+    var buttons: [SKSpriteNode] = [SKSpriteNode]()
+    var buttonsOpen: Bool = false
     
     // Node for labels to attach to
     private var labelNode: SKNode = SKNode()
@@ -40,6 +46,10 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
     // Energy motherships need
     private var energy: Int = 100
     private var energyLabel: SKLabelNode = SKLabelNode(fontNamed: "HelveticaNeue")
+    private let energyPerSecond: Int = 3
+    private var timeElapsed: Double = 0.0
+    
+    private var buildBar: ProgressBar?
     
     // Initialize the mother ship
     override init(position: Vector? = nil, heading: Vector? = nil, team: Int = Config.Team.NoTeam, userControlled: Bool = false) {
@@ -85,7 +95,7 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
         shieldNode!.lineWidth = 2.0
         shieldNode!.fillColor = .clear
         shieldNode!.strokeColor = UIColor(red: 98, green: 227, blue: 255)
-        shieldNode!.zPosition = Config.RenderPriority.GameFront
+        //shieldNode!.zPosition = Config.RenderPriority.GameFront
         
         let upScale: SKAction = SKAction.scale(to: 1.05, duration: 0.8)
         let downScale: SKAction = SKAction.scale(to: 1.0, duration: 0.8)
@@ -122,6 +132,28 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
         setupTouchNode()
         
         baseNode.addChild(touchNode!)
+        
+        // Setup the touch controls
+        if userControlled {
+            let createFighterShipButton = SKSpriteNode(imageNamed: "PopupFighterShip")
+            createFighterShipButton.color = Config.getTeamColor(team: self.team)
+            createFighterShipButton.colorBlendFactor = 1
+            createFighterShipButton.zPosition = Config.RenderPriority.GameFront + 0.2
+            createFighterShipButton.setScale(0.1)
+            createFighterShipButton.name = "\(name!).Button.\(MotherShipButton.CreateFighterShip)"
+            
+            buttons.append(createFighterShipButton)
+            setPositions(length: radius * 2.5, offset: 45)
+            
+            for button in buttons {
+                button.isHidden = true
+                baseNode.addChild(button)
+            }
+        }
+        
+        // Setup the progress bar for building units
+        buildBar = ProgressBar(width: radius * 1.75, height: 15, x: 0, y: radius * 1.6 + 30)
+        buildBar?.addNodes(toNode: baseNode)
         
         // Setup the energy monitor
         energyLabel.text = "Energy: \(energy)"
@@ -172,10 +204,30 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
         let fighterShip = FighterShip(position: position, heading: spawnToward, team: team)
         fighterShip.setBoundary(origin: boundaryOrigin!, distance: Config.MotherShipBoundaryLength)
         fighterShip.userControlled = self.userControlled
+        fighterShip.mothership = self
         
         fighterShips.append(fighterShip)
         
         ObjectManager.sharedInstance.addObject(object: fighterShip)
+    }
+    
+    // Adjust energy level
+    func changeEnergy(_ update: Int) {
+        energy += update
+        
+        if energy >= 200 {
+            energy = 200
+            energyLabel.fontColor = .yellow
+        }
+        else if energy < 0 {
+            energy = 0
+        }
+        else {
+            energyLabel.fontColor = .white
+        }
+        
+        // Update the energy label
+        energyLabel.text = "Energy: \(energy)"
     }
     
     // Handle a collision with an object
@@ -207,7 +259,7 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
         // Check if contacted with a resource
         else if let _ = object as? Resource {
             // Collect the resource
-            energy += 25
+            changeEnergy(50)
         }
     }
     
@@ -220,7 +272,7 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
                 objectsInPeripheral[name] = motherShip
                 
                 // Move the boundary since a new mothership is in the fray
-                moveBoundary()
+                moveBoundary(force: true)
             }
         }
     }
@@ -233,7 +285,7 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
                 objectsInPeripheral.removeValue(forKey: name)
                 
                 // Move the boundary since a new mothership is in the fray
-                moveBoundary()
+                moveBoundary(force: true)
             }
         }
     }
@@ -262,7 +314,7 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
     }
     
     // Move boundary
-    func moveBoundary() {
+    func moveBoundary(force: Bool = false) {
         // Move to the average position of all motherships
         var newX: CGFloat = position.x, newY: CGFloat = position.y, count: Int = 1
         for (_, obj) in objectsInPeripheral {
@@ -278,6 +330,9 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
         
         // Move the boundary to the new position
         let moveAction = SKAction.move(to: CGPoint(x: newX, y: newY), duration: 0.5)
+        if force {
+            peripheralNode.removeAllActions()
+        }
         peripheralNode.run(moveAction)
     }
     
@@ -288,14 +343,23 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
             return false
         }
         
-        // Check if we can spawn a fighter ship
-        if spawningCooldown < 0 {
-            spawnFighterShip()
+        // Non-usercontrolled updates
+        if !userControlled {
+            // Check if we can spawn a fighter ship
+            if energy >= 25 && !buildBar!.inProgress && fighterShips.count < 8 {
+                buildBar?.start(action: MotherShipButton.CreateFighterShip, duration: 5.0)
+                changeEnergy(-25)
+            }
             
-            spawningCooldown += Config.MotherShipSpawnCooldown
+            timeElapsed += dTime
+            
+            if timeElapsed > 2 {
+                timeElapsed -= 2
+                
+                changeEnergy(1)
+            }
         }
-        spawningCooldown -= dTime
-        
+
         // Clean up dead fighter ships
         fighterShips.removeAll(where: {$0.isActive == false})
         
@@ -321,8 +385,12 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
         // Update the boundary position
         moveBoundary()
         
-        // Update the energy label
-        energyLabel.text = "Energy: \(energy)"
+        // Update the build bar
+        if let action = buildBar?.update() {
+            if action == MotherShipButton.CreateFighterShip {
+                spawnFighterShip()
+            }
+        }
         
         // Update the mothership with the current state
         stateMachine?.update(dTime: dTime)
@@ -331,27 +399,7 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
     }
     
     override func inputTouchDown(touchPos: CGPoint) -> Bool {
-        if userControlled {
-            // Pause the game while user actions are taking place
-            ObjectManager.sharedInstance.pause()
-            
-            // End the path
-            releasePathNode()
-            
-            // Setup the line node
-            line = SKShapeNode()
-            path = CGMutablePath()
-            line!.strokeColor = .lightGray
-            line!.alpha = 0.5
-            line!.lineWidth = 4
-            
-            // Start drawing the line if necessary
-            if position.distanceBetween(vector: Vector(touchPos)) > radius * 1.25 {
-                drawPath(pos: touchPos)
-            }
-            
-            // Add this node to the scene
-            ObjectManager.sharedInstance.addNode(node: line!)
+        if userControlled && ObjectManager.sharedInstance.activeObject == nil {
             ObjectManager.sharedInstance.activeObject = self
             
             return true
@@ -362,6 +410,22 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
     
     override func inputTouchMoved(touchPos: CGPoint) -> Bool {
         if userControlled {
+            if !touchHeld {
+                // End the path
+                releasePathNode()
+                
+                // Setup the line node
+                line = SKShapeNode()
+                path = CGMutablePath()
+                line!.strokeColor = .lightGray
+                line!.alpha = 0.5
+                line!.lineWidth = 4
+                
+                // Add this node to the scene
+                touchHeld = true
+                ObjectManager.sharedInstance.addNode(node: line!)
+            }
+            
             // Start drawing the line when necessary
             if position.distanceBetween(vector: Vector(touchPos)) > radius * 1.25 {
                 drawPath(pos: touchPos)
@@ -375,13 +439,11 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
     }
     
     override func inputTouchUp(touchPos: CGPoint) -> Bool {
-        if userControlled && ObjectManager.sharedInstance.activeObject == self {
-            // Unpause the game, as the move action is completed
-            ObjectManager.sharedInstance.unpause()
-            
+        if userControlled && ObjectManager.sharedInstance.activeObject == self && touchHeld {
             // Setup the steering behavior with the path array
             steeringBehavior!.setToFollowPath(path: points.reversed(), accuracy: 1.25)
             points.removeAll()
+            touchHeld = false
             
             // Change into the moving state
             stateMachine?.changeState(newState: MotherShipMoveState.sharedInstance)
@@ -393,6 +455,42 @@ class MotherShip: MovingObject, ObjectPeripheralSight, ObjectTouchControls {
         }
         
         return false
+    }
+    
+    override func inputTapped(touchPos: CGPoint) -> Bool {
+        if userControlled && ObjectManager.sharedInstance.activeObject == self {
+            // Release self as active object and cancel movement
+            points.removeAll()
+            touchHeld = false
+            
+            if buttonsOpen {
+                buttonsOpen = hideButtons()
+                ObjectManager.sharedInstance.unpause()
+                ObjectManager.sharedInstance.activeObject = nil
+            }
+            else {
+                buttonsOpen = showButtons(scale: Config.MotherShipScale * 0.75)
+            }
+            
+            return true
+        }
+        
+        return false
+    }
+    
+    override func buttonTouched(name: String) -> Bool {
+        if name == MotherShipButton.CreateFighterShip {
+            if energy >= 25 && !buildBar!.inProgress {
+                buildBar?.start(action: name, duration: 5.0)
+                changeEnergy(-25)
+            }
+        }
+        else {
+            // Failed? Not a valid button somehow
+            return false
+        }
+        
+        return true
     }
     
     override func destroy() {

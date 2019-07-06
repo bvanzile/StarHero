@@ -26,7 +26,7 @@ class Asteroid: MovingObject {
         deceleration = Config.AsteroidDeceleration
         
         //Set the team color
-        asteroidNode.setScale(Config.AsteroidScale)
+        asteroidNode.setScale(0.01)
         asteroidNode.color = .gray
         asteroidNode.colorBlendFactor = 1
         asteroidNode.zPosition = Config.RenderPriority.GameDefault
@@ -50,6 +50,7 @@ class Asteroid: MovingObject {
         
         // Setup the rotation action
         let rotation = SKAction.rotate(byAngle: CGFloat.pi * 2, duration: Double.random(in: 2...10))
+        asteroidNode.run(SKAction.scale(to: Config.AsteroidScale, duration: 0.5))
         asteroidNode.run(SKAction.repeatForever(rotation))
         
         // Set the node's position and heading

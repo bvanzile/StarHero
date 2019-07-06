@@ -12,6 +12,7 @@ import SpriteKit
 class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight, ObjectTouchControls {
     // Sprite for fighter ships
     private let fighterShipNode = SKSpriteNode(imageNamed: Config.FighterShipLocation)
+    var mothership: MotherShip?
     
     // Controls whether the fightership can attack right now
     var canAttack: Bool = true
@@ -76,7 +77,7 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight, ObjectTouc
         fighterShipNode.physicsBody?.isDynamic = true
         fighterShipNode.physicsBody?.affectedByGravity = false
         fighterShipNode.physicsBody?.categoryBitMask = Config.BitMaskCategory.FighterShip
-        fighterShipNode.physicsBody?.contactTestBitMask = Config.BitMaskCategory.FighterShip + Config.BitMaskCategory.MotherShip
+        fighterShipNode.physicsBody?.contactTestBitMask = Config.BitMaskCategory.FighterShip + Config.BitMaskCategory.MotherShip + Config.BitMaskCategory.Resource
         fighterShipNode.physicsBody?.collisionBitMask = 0x0
         
         // Move the sight to be in front of the ship and not visible
@@ -149,7 +150,7 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight, ObjectTouc
             let accurateShotAngle = atan(enemy.radius / accurateShotVelocity.length())
             
             // Check if our current heading is close enough to start firing
-            if self.heading.dot(vector: accurateShotVelocity) <= accurateShotAngle * 1.2 {
+            if self.heading.dot(vector: accurateShotVelocity) <= accurateShotAngle + 0.15 {
                 
                 // Now we need to check if we would hit a friendly
                 if objectsInSight.count > 1 {
@@ -347,6 +348,11 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight, ObjectTouc
             // If this is someone else's missile, destroy this ship
             destroy()
         }
+        // Check if it's resource
+        else if let _ = object as? Resource {
+            // Add it to owner mothership
+            mothership?.changeEnergy(25)
+        }
     }
     
     // Handle a collision with an object
@@ -505,12 +511,19 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight, ObjectTouc
             }
         }
         
+        // Clean up the mothership in case it gets destroyed
+        if let ms = mothership {
+            if !ms.isActive {
+                mothership = nil
+            }
+        }
+        
         // Return in bounds if we find ourselves outside the boundary
         if(isOutOfBounds() && !stateMachine!.isInState(FighterShipReturnToFieldState.sharedInstance, FighterShipDodgeState.sharedInstance)) {
             stateMachine?.changeState(newState: FighterShipReturnToFieldState.sharedInstance)
         }
         
-        debugText.text = "\(objectsInSight.count)"
+        //debugText.text = "\(objectsInSight.count)"
         
         // Update the fighter ship with the current state
         stateMachine?.update(dTime: dTime)
@@ -519,7 +532,7 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight, ObjectTouc
     }
     
     override func inputTouchDown(touchPos: CGPoint) -> Bool {
-        if userControlled {
+        if userControlled && ObjectManager.sharedInstance.activeObject == nil {
             // Pause everything while the action takes place
             ObjectManager.sharedInstance.pause()
             
@@ -601,6 +614,15 @@ class FighterShip: MovingObject, ObjectCanSee, ObjectPeripheralSight, ObjectTouc
             return true
         }
         
+        return false
+    }
+    
+    override func inputTapped(touchPos: CGPoint) -> Bool {
+        if userControlled {
+            let _ = inputTouchUp(touchPos: touchPos)
+            
+            return true
+        }
         return false
     }
     
